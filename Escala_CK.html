@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Escala de Calificaciones – Generador</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Generador interactivo de escalas de calificaciones con calculadora para alumnos y exportación a imagen/PDF." />
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --card: #121318;
+      --muted: #8892a6;
+      --text: #e9edf3;
+      --accent: #5cc8ff;
+      --accent-2: #70e1a1;
+      --danger: #ff7676;
+      --border: #1f2230;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0 0 0.6rem;
+    }
+
+    .wrap {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px 32px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .header {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: start;
+    }
+
+    .school {
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: var(--muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(3, minmax(120px, 1fr));
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      background: #0e0f14;
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .row-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: #00141f;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    button.secondary {
+      background: #18202c;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    button.ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px dashed var(--accent);
+    }
+
+    button.danger {
+      background: var(--danger);
+      color: #330;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .advanced {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .advanced.show {
+      display: block;
+    }
+
+    .advanced .controls {
+      grid-template-columns: repeat(8, minmax(120px, 1fr));
+    }
+
+    .table-wrap {
+      margin-top: 16px;
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      min-width: 900px;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #0f1016;
+      z-index: 2;
+    }
+
+    thead th:first-child {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+    }
+
+    tbody td:first-child {
+      position: sticky;
+      left: 0;
+      background: #0f1016;
+      font-weight: 700;
+    }
+
+    thead tr th {
+      white-space: nowrap;
+    }
+
+    tbody td {
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 12px;
+      border-radius: 999px;
+      background: #0d1822;
+      color: var(--accent);
+      border: 1px solid #143246;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      background: #0f1c13;
+      color: var(--accent-2);
+      border: 1px solid #183122;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .calc {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .result {
+      margin-top: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #0e1016;
+    }
+
+    .result strong {
+      font-size: 18px;
+    }
+
+    .footer {
+      margin-top: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .credits {
+      font-weight: 700;
+      color: var(--accent-2);
+      white-space: nowrap;
+    }
+
+    .warn {
+      color: #ffd080;
+    }
+
+    @media (max-width: 900px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .calc {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        grid-template-columns: 1fr;
+      }
+
+      .credits {
+        white-space: normal;
+      }
+    }
+      .high-contrast {
+      --bg: #000000;
+      --card: #000000;
+      --text: #ffffff;
+      --muted: #f5f5f5;
+      --accent: #ffff00;
+      --accent-2: #00ffff;
+      --danger: #ff6666;
+      --border: #ffffff;
+    }
+
+    .high-contrast table th,
+    .high-contrast table td {
+      border-bottom: 1px solid #ffffff;
+    }
+
+    .high-contrast .card {
+      box-shadow: 0 0 0 2px #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" id="capturable">
+    <div class="card" aria-label="Generador de escala de calificaciones">
+      <header class="header">
+        <div>
+          <h1>Escala de Calificaciones</h1>
+          <p class="school" id="infoLine">
+            Criterios generales de promoción · Nivel de exigencia:
+            <span class="tag" id="exigencyTag">70%</span>
+          </p>
+        </div>
+        <div class="row-actions" style="justify-content:flex-end">
+          <button id="btnContrast" class="secondary" type="button" title="Alternar alto contraste" aria-pressed="false">
+            <span aria-hidden="true">⚫️</span>
+            <span>Alto contraste</span>
+          </button>
+          <button id="btnCapture" type="button" title="Descargar imagen de la escala y resultados" aria-label="Capturar escala como imagen PNG">
+            <span aria-hidden="true">📸</span>
+            <span>Capturar (PNG)</span>
+          </button>
+          <button id="btnPrint" class="secondary" type="button" title="Imprimir o guardar como PDF" aria-label="Imprimir o guardar escala como PDF">
+            <span aria-hidden="true">🖨️</span>
+            <span>Imprimir / PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Controles principales -->
+      <section class="controls" style="margin-top: 14px;" aria-label="Parámetros principales de la escala">
+        <div class="control">
+          <label for="totalPts">Total de puntos (N)</label>
+          <input type="number" id="totalPts" value="30" min="1" />
+          <div class="hint">Es el puntaje total de la prueba (ej.: 30 puntos).</div>
+        </div>
+
+        <div class="control">
+          <label for="exigencyPreset">Nivel de exigencia (preestablecido)</label>
+          <select id="exigencyPreset">
+            <option value="50">50%</option>
+            <option value="60">60%</option>
+            <option value="70" selected>70%</option>
+            <option value="80">80%</option>
+            <option value="custom">Personalizado</option>
+          </select>
+          <div class="hint">Selecciona 50, 60, 70 u 80%. Luego puedes ajustar manualmente.</div>
+        </div>
+
+        <div class="control" id="exigencyBox" style="display:none;">
+          <label for="exigencyInput">Nivel de exigencia (%)</label>
+          <input type="number" id="exigencyInput" value="70" min="1" max="99" />
+          <div class="hint">Solo se edita en modo personalizado.</div>
+        </div>
+        </div>
+      </section>
+
+      <div class="row-actions" aria-label="Acciones sobre la escala">
+        <button id="btnGenerate" type="button">Generar tabla</button>
+        <span class="muted">
+          Muestra la escala numérica para un único total de puntos usando el método oficial (límite inferior + regla de residuos).
+        </span>
+      </div>
+
+      <!-- Tabla -->
+      <section class="table-wrap" id="tableWrap" style="display:none;" aria-label="Tabla de escalas generada">
+        <table id="scaleTable" aria-label="Escala de Calificaciones">
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </section>
+
+      <!-- Calculadora -->
+      <h3 style="margin-top:16px;">Calculadora para el alumno</h3>
+      <section class="calc" aria-label="Calculadora de calificación para el alumno">
+        <div class="control">
+          <label for="calcTotal">Total de puntos (N)</label>
+          <input type="number" id="calcTotal" min="1" value="30" />
+        </div>
+        <div class="control">
+          <label for="calcScore">Puntaje alcanzado (A)</label>
+          <input type="number" id="calcScore" min="0" value="0" />
+        </div>
+        <div class="control">
+          <label>&nbsp;</label>
+          <button id="btnCalc" type="button">Calcular</button>
+        </div>
+        <div class="control">
+          <label>&nbsp;</label>
+          <div class="hint">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
+        </div>
+      </section>
+
+      <div class="result" id="calcResult" role="status" aria-live="polite">
+        <strong>Calificación:</strong> —<br />
+        <span class="muted">Ingresa el puntaje del alumno para ver el resultado en esta casilla.</span>
+      </div>
+
+      <footer class="footer">
+        <p class="muted">
+          Basado en las **Exigencias del Sistema de Evaluación de la Educación Básica – EPJA** según el Ministerio de Educación y Ciencias (MEC).<br>
+          Fuente oficial: *Sistema de Evaluación – Educación Básica EPJA*. Disponible en el MEC.
+        </p>
+        <p class="credits">CK, 2025 — Deyhut</p>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Librería para captura a imagen -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-8aI1Xw03J0kH3g1o9wPDqD0M1/3GxZJpF9bFZQm2f+U=" crossorigin="anonymous"></script>
+
+  <script>
+    (function () {
+      const $ = (s) => document.querySelector(s);
+
+      const numberName = (n) => ["", "Uno", "Dos", "Tres", "Cuatro", "Cinco"][n] || "";
+      const descriptor = (n) => ["", "Insuficiente", "Aceptable", "Bueno", "Muy bueno", "Excelente"][n] || "";
+
+      const els = {
+        infoLine: $("#infoLine"),
+        exigencyTag: $("#exigencyTag"),
+        totalPts: $("#totalPts"),
+        exigencyPreset: $("#exigencyPreset"),
+        exigencyBox: $("#exigencyBox"),
+        exigencyInput: $("#exigencyInput"),
+        thead: $("#thead"),
+        tbody: $("#tbody"),
+        tableWrap: $("#tableWrap"),
+        btnGenerate: $("#btnGenerate"),
+        btnCapture: $("#btnCapture"),
+        btnPrint: $("#btnPrint"),
+        btnContrast: $("#btnContrast"),
+        // calc
+        calcTotal: $("#calcTotal"),
+        calcScore: $("#calcScore"),
+        btnCalc: $("#btnCalc"),
+        calcResult: $("#calcResult"),
+      };
+
+      function clampInt(x, lo, hi) {
+        x = Math.round(x);
+        return Math.max(lo, Math.min(hi, x));
+      }
+
+      function getExigency() {
+        let p = parseFloat(els.exigencyInput.value || "70");
+        if (isNaN(p)) p = 70;
+        if (p < 1) p = 1;
+        if (p > 99) p = 99;
+        els.exigencyInput.value = String(p);
+        els.exigencyTag.textContent = `${p}%`;
+        return p;
+      }
+
+      function syncPresetToInput() {
+        const preset = els.exigencyPreset.value;
+        if (preset === "custom") {
+          // Mostrar caja solo en modo personalizado; no tocamos el valor que ya tenga
+          els.exigencyBox.style.display = "flex";
+          return;
+        }
+        els.exigencyBox.style.display = "none";
+        els.exigencyInput.value = preset;
+        getExigency();
+      }
+
+      /**
+       * Algoritmo oficial (ejemplo con N = 30):
+       * - Límite inferior (LI) = N * %exigencia (regla de tres). Se redondea hacia arriba.
+       * - Límite superior (LS) = N (total de puntos).
+       * - Cantidad de puntos entre LI y LS (incluidos): LS - LI + 1.
+       * - Se divide esa cantidad por 4 (calificaciones 2,3,4,5) → cociente y residuo.
+       * - Cada calificación recibe "cociente" puntos; el residuo se reparte según la regla de los residuos:
+       *   · residuo 1 → +1 a la calificación 3
+       *   · residuo 2 → +1 a 3 y +1 a 4
+       *   · residuo 3 → +1 a 3, +1 a 4 y +1 a 2
+       * - La calificación 1 va de 1 hasta LI - 1.
+       */
+      function computeRangesForN(N, exigencyPct) {
+        if (N <= 0) {
+          return ["—", "—", "—", "—", "—", { li: 0, ls: 0, ranges: [] }];
+        }
+
+        const LS = N;
+        let LI = Math.ceil((exigencyPct / 100) * N);
+        if (LI < 1) LI = 1;
+        if (LI > LS) LI = LS; // caso extremo
+
+        let points = LS - LI + 1;
+
+        if (points <= 0) {
+          const r1 = [1, N];
+          const empty = [0, -1];
+          return [fmtRange(r1, 1, N), "—", "—", "—", "—", { li: LI, ls: LS, ranges: [r1, empty, empty, empty, empty] }];
+        }
+
+        const base = Math.floor(points / 4);
+        let rem = points % 4;
+
+        const sizes = [base, base, base, base]; // [2,3,4,5]
+
+        if (rem === 1) {
+          sizes[1] += 1; // +1 a 3
+        } else if (rem === 2) {
+          sizes[1] += 1; // +1 a 3
+          sizes[2] += 1; // +1 a 4
+        } else if (rem === 3) {
+          sizes[1] += 1; // +1 a 3
+          sizes[2] += 1; // +1 a 4
+          sizes[0] += 1; // +1 a 2
+        }
+
+        let remaining = points;
+        for (let i = 0; i < sizes.length; i++) {
+          if (remaining <= 0) {
+            sizes[i] = 0;
+          } else if (sizes[i] === 0 && remaining > 0) {
+            sizes[i] = 1;
+            remaining -= 1;
+          } else {
+            remaining -= sizes[i];
+          }
+        }
+
+        let start = LI;
+        const seg2 = sizes[0] > 0 ? [start, start + sizes[0] - 1] : [start, start - 1];
+        start = seg2[1] + 1;
+        const seg3 = sizes[1] > 0 ? [start, start + sizes[1] - 1] : [start, start - 1];
+        start = seg3[1] + 1;
+        const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : [start, start - 1];
+        start = seg4[1] + 1;
+        const seg5 = sizes[3] > 0 ? [start, LS] : [start, start - 1];
+
+        const seg1 = [1, LI - 1];
+
+        const r1 = fmtRange(seg1, 1, N);
+        const r2 = fmtRange(seg2, 2, N);
+        const r3 = fmtRange(seg3, 3, N);
+        const r4 = fmtRange(seg4, 4, N);
+        const r5 = fmtRange(seg5, 5, N);
+
+        return [r1, r2, r3, r4, r5, { li: LI, ls: LS, ranges: [seg1, seg2, seg3, seg4, seg5] }];
+      }
+
+      function fmtRange([a, b], grade, N) {
+        a = clampInt(a, 1, N);
+        b = clampInt(b, 1, N);
+        if (a > b) return "—";
+        if (a === b) return `${a} = ${grade}`;
+        return `${a} - ${b} = ${grade}`;
+      }
+
+      function generate() {
+        let N = parseInt(els.totalPts.value || "1", 10);
+        if (isNaN(N) || N < 1) N = 1;
+        els.totalPts.value = String(N);
+
+        const exigency = getExigency();
+
+        els.tableWrap.style.display = "block";
+        els.thead.innerHTML = "";
+        els.tbody.innerHTML = "";
+
+        const trh = document.createElement("tr");
+        const th0 = document.createElement("th");
+        th0.textContent = "ESCALA DE CALIFICACIONES";
+        trh.appendChild(th0);
+
+        const th = document.createElement("th");
+        th.textContent = `${N} puntos`;
+        trh.appendChild(th);
+
+        els.thead.appendChild(trh);
+
+        const grades = [1, 2, 3, 4, 5];
+        const [r1, r2, r3, r4, r5] = computeRangesForN(N, exigency);
+        const rowRanges = [r1, r2, r3, r4, r5];
+
+        grades.forEach((grade, idx) => {
+          const tr = document.createElement("tr");
+          const td0 = document.createElement("td");
+          td0.innerHTML = `<strong>${grade}</strong>`;
+          tr.appendChild(td0);
+
+          const td = document.createElement("td");
+          td.textContent = rowRanges[idx];
+          tr.appendChild(td);
+
+          els.tbody.appendChild(tr);
+        });
+
+        // Sincronizamos también la calculadora con este N
+        els.calcTotal.value = String(N);
+      }
+
+      function calculate() {
+        const total = parseInt(els.calcTotal.value || "0", 10);
+        const scoreRaw = parseInt(els.calcScore.value || "0", 10);
+
+        if (!(total > 0)) {
+          els.calcResult.innerHTML = '<span class="warn">Ingresa un total de puntos válido (N &gt; 0).</span>';
+          return;
+        }
+
+        const exigency = getExigency();
+        const inRange = clampInt(scoreRaw, 0, total);
+        if (inRange !== scoreRaw) {
+          els.calcResult.innerHTML = `<span class="warn">Se ajustó el puntaje a ${inRange}/${total} para estar dentro del rango.</span>`;
+        }
+
+        const [r1, r2, r3, r4, r5, meta] = computeRangesForN(total, exigency);
+        const ranges = meta.ranges;
+        const seg1 = ranges[0];
+        const seg2 = ranges[1];
+        const seg3 = ranges[2];
+        const seg4 = ranges[3];
+        const seg5 = ranges[4];
+
+        let grade = 1;
+        if (inRange >= seg5[0] && inRange <= seg5[1]) grade = 5;
+        else if (inRange >= seg4[0] && inRange <= seg4[1]) grade = 4;
+        else if (inRange >= seg3[0] && inRange <= seg3[1]) grade = 3;
+        else if (inRange >= seg2[0] && inRange <= seg2[1]) grade = 2;
+        else if (inRange >= seg1[0] && inRange <= seg1[1]) grade = 1;
+
+        const pct = (inRange / total) * 100;
+        const txt = `${grade} (${numberName(grade)}) – ${descriptor(grade)}`;
+
+        els.calcResult.innerHTML = `
+          <strong>Calificación:</strong> ${txt}<br>
+          Puntaje: <strong>${inRange}</strong> / ${total}
+          &nbsp;(<span class="muted">${pct.toFixed(2)}%</span>)<br>
+          Nivel de exigencia: <span class="muted">${exigency}%</span><br>
+        `;
+      }
+
+      // Eventos
+      els.exigencyPreset.addEventListener("change", syncPresetToInput);
+      els.exigencyInput && els.exigencyInput.addEventListener("input", getExigency);
+      els.btnGenerate.addEventListener("click", generate);
+      els.btnCalc.addEventListener("click", calculate);
+
+      els.btnContrast.addEventListener("click", () => {
+        const isOn = document.body.classList.toggle("high-contrast");
+        els.btnContrast.setAttribute("aria-pressed", String(isOn));
+      });
+
+      els.btnCapture.addEventListener("click", async () => {
+        const node = document.getElementById("capturable");
+        if (!window.html2canvas || !node) return;
+
+        els.btnCapture.disabled = true;
+        try {
+          const canvas = await html2canvas(node, { scale: 2, useCORS: true });
+          const link = document.createElement("a");
+          const now = new Date();
+          const stamp =
+            String(now.getFullYear()) +
+            String(now.getMonth() + 1).padStart(2, "0") +
+            String(now.getDate()).padStart(2, "0") +
+            "_" +
+            String(now.getHours()).padStart(2, "0") +
+            String(now.getMinutes()).padStart(2, "0");
+          const exigency = getExigency();
+          link.download = `escala_${exigency}pct_${stamp}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } finally {
+          els.btnCapture.disabled = false;
+        }
+      });
+
+      els.btnPrint.addEventListener("click", () => window.print());
+
+      // Inicialización
+      syncPresetToInput();
+      getExigency();
+      generate();
+    })();
+  </script>
+</body>
+</html>
