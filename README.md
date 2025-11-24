@@ -1,8 +1,8 @@
-# Escala de Calificaciones · Despliegue en Vercel
+# Escala de Calificaciones · Lista para Vercel
 
-Este repositorio contiene una aplicación web estática que genera tablas de escalas de calificaciones y permite a los alumnos calcular su nota según el nivel de exigencia definido.
+Aplicación 100 % estática que genera tablas oficiales de escalas de calificaciones y ofrece una calculadora para el alumno con modo de alto contraste y compatibilidad directa con impresión/PDF del navegador.
 
-La aplicación está empaquetada en `index.html`, no requiere backend y se publica como un sitio estático generando la carpeta `dist/` durante el build.
+Todo vive en `index.html`, por lo que basta con copiarlo a `dist/` (lo hace `npm run build`) para desplegarlo como sitio estático.
 
 ## Requisitos
 
@@ -25,13 +25,20 @@ Para validar la estructura HTML antes de desplegar:
 npm run lint
 ```
 
+## Características rápidas
+
+- Generador de tablas oficial con algoritmo de límites y regla de residuos.
+- Calculadora sincronizada con el nivel de exigencia configurado.
+- Interfaz responsiva con modo de alto contraste accesible.
+- Botón de impresión para exportar o guardar como PDF usando el navegador.
+
 ## Despliegue en Vercel
 
-1. Inicia sesión en [vercel.com](https://vercel.com/) y crea un nuevo proyecto importando este repositorio desde GitHub.
-2. En **Build & Output Settings** define:
-	- **Build Command**: `npm run build`
-	- **Output Directory**: `dist`
-3. Pulsa **Deploy**. La configuración descrita en `vercel.json` generará un sitio estático y aplicará un fallback universal a `index.html` para manejar rutas limpias.
+1. Importa el repo en [vercel.com](https://vercel.com/) o usa Vercel CLI.
+2. Configura **Build Command** = `npm run build` y **Output Directory** = `dist` (coincide con `vercel.json`).
+3. Publica. El fallback definido en `vercel.json` redirige cualquier ruta a `index.html`, así que puedes usar rutas limpias sin errores 404.
+
+> Consejo: como el proyecto es estático, puedes activar **Deploy Hooks** o previews automáticas en cada pull request sin costos extra.
 
 ### Despliegue con Vercel CLI (opcional)
 
@@ -45,7 +52,7 @@ El comando construye la carpeta `dist/` y luego ejecuta `vercel --prod`, publica
 
 - `index.html`: Aplicación completa (UI, estilos y lógica JS)
 - `dist/`: Salida generada durante `npm run build` (se crea automáticamente)
-- `vercel.json`: Configuración para servir el sitio estático con fallback de rutas
+- `vercel.json`: Configuración para servir el sitio estático con fallback de rutas limpias
 - `package.json`: Scripts útiles para desarrollo, linting y despliegue
 - `README.md`: Esta guía
 
@@ -55,4 +62,4 @@ El comando construye la carpeta `dist/` y luego ejecuta `vercel --prod`, publica
 - Si deseas añadir más activos (imágenes, fuentes, etc.), colócalos en la raíz y Vercel los servirá de forma estática.
 - Para cambios de estilo mayores, considera extraer el CSS a un fichero separado y referenciarlo mediante `<link rel="stylesheet">`.
 
-¡Lista para publicar! Abre un pull request con tus ajustes y Vercel generará vistas previas automáticamente.
+¡Lista para publicar! Cada push gatilla un preview en Vercel y, al promoverlo, la URL de producción se actualiza en segundos.

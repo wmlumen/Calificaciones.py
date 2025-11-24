@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Escala de Calificaciones – Generador</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Generador interactivo de escalas de calificaciones con calculadora para alumnos y exportación a imagen/PDF.">
+  <meta name="description" content="Generador interactivo de escalas de calificaciones con calculadora para alumnos y soporte directo de impresión/PDF.">
   <style>
     :root {
       --bg: #0b0c10;
@@ -16,7 +16,7 @@
       --danger: #ff7676;
       --border: #1f2230;
     }
-
+      
     * {
       box-sizing: border-box;
     }
@@ -182,17 +182,29 @@
       display: none;
     }
 
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
     table {
       width: 100%;
       border-collapse: separate;
       border-spacing: 0;
-      min-width: 900px;
+      table-layout: fixed;
     }
 
     th,
     td {
       padding: 10px 12px;
       border-bottom: 1px solid var(--border);
+      word-break: break-word;
     }
 
     th {
@@ -215,12 +227,12 @@
       font-weight: 700;
     }
 
-    thead tr th {
-      white-space: nowrap;
+    thead tr th,
+    tbody td {
+      white-space: normal;
     }
 
     tbody td {
-      white-space: nowrap;
       font-variant-numeric: tabular-nums;
     }
 
@@ -337,7 +349,7 @@
 <body>
   <div class="wrap" id="capturable">
     <div class="card">
-      <header class="header">
+  <header class="header" aria-label="Cabecera principal">
         <div>
           <h1>Escala de Calificaciones</h1>
           <p class="school" id="infoLine">
@@ -350,10 +362,6 @@
             <span aria-hidden="true">⚫️</span>
             <span>Alto contraste</span>
           </button>
-          <button id="btnCapture" type="button" title="Descargar imagen de la escala y resultados" aria-label="Capturar escala como imagen PNG">
-            <span aria-hidden="true">📸</span>
-            <span>Capturar (PNG)</span>
-          </button>
           <button id="btnPrint" class="secondary" type="button" title="Imprimir o guardar como PDF" aria-label="Imprimir o guardar escala como PDF">
             <span aria-hidden="true">🖨️</span>
             <span>Imprimir / PDF</span>
@@ -362,7 +370,8 @@
       </header>
 
       <!-- Controles principales -->
-      <section class="controls controls-primary">
+  <section class="controls controls-primary" aria-labelledby="controlsHeading" aria-label="Parámetros principales">
+        <h2 id="controlsHeading" class="sr-only">Parámetros principales</h2>
         <div class="control">
           <label for="totalPts">Total de puntos (N)</label>
           <input type="number" id="totalPts" value="30" min="1">
@@ -396,7 +405,8 @@
       </div>
 
       <!-- Tabla -->
-      <section class="table-wrap" id="tableWrap">
+  <section class="table-wrap" id="tableWrap" aria-labelledby="tableHeading" aria-label="Tabla generada">
+        <h2 id="tableHeading" class="sr-only">Tabla generada</h2>
         <table id="scaleTable">
           <thead id="thead"></thead>
           <tbody id="tbody"></tbody>
@@ -404,8 +414,8 @@
       </section>
 
       <!-- Calculadora -->
-      <h3 class="calc-title">Calculadora para el alumno</h3>
-      <section class="calc">
+      <h3 class="calc-title" id="calcHeading">Calculadora para el alumno</h3>
+  <section class="calc" aria-labelledby="calcHeading" aria-label="Calculadora para el alumno">
         <div class="control">
           <label for="calcTotal">Total de puntos (N)</label>
           <input type="number" id="calcTotal" min="1" value="30">
@@ -439,9 +449,6 @@
     </div>
   </div>
 
-  <!-- Librería para captura a imagen -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-8aI1Xw03J0kH3g1o9wPDqD0M1/3GxZJpF9bFZQm2f+U=" crossorigin="anonymous"></script>
-
   <script>
     (function () {
       const $ = (s) => document.querySelector(s);
@@ -460,10 +467,8 @@
         tbody: $("#tbody"),
         tableWrap: $("#tableWrap"),
         btnGenerate: $("#btnGenerate"),
-        btnCapture: $("#btnCapture"),
         btnPrint: $("#btnPrint"),
         btnContrast: $("#btnContrast"),
-        // calc
         calcTotal: $("#calcTotal"),
         calcScore: $("#calcScore"),
         btnCalc: $("#btnCalc"),
@@ -485,78 +490,9 @@
         return p;
       }
 
-      function canvasToBlob(canvas) {
-        return new Promise((resolve, reject) => {
-          canvas.toBlob(
-            (blob) => {
-              if (blob) {
-                resolve(blob);
-              } else {
-                reject(new Error("No se pudo generar la captura"));
-              }
-            },
-            "image/png",
-            0.95
-          );
-        });
-      }
-
-      function downloadBlob(blob, filename) {
-        const nav = window.navigator;
-        if (nav && typeof nav.msSaveOrOpenBlob === "function") {
-          nav.msSaveOrOpenBlob(blob, filename);
-          return;
-        }
-
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        link.rel = "noopener";
-        document.body.appendChild(link);
-        link.click();
-        requestAnimationFrame(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
-        });
-      }
-
-      async function shareBlob(blob, filename) {
-        if (typeof navigator === "undefined" || typeof navigator.share !== "function" || typeof navigator.canShare !== "function" || typeof File !== "function") {
-          return false;
-        }
-
-        let shareFile;
-        try {
-          shareFile = new File([blob], filename, { type: blob.type || "image/png" });
-        } catch (error) {
-          return false;
-        }
-
-        let canShareFiles = false;
-        try {
-          canShareFiles = navigator.canShare({ files: [shareFile] });
-        } catch (error) {
-          canShareFiles = false;
-        }
-        if (!canShareFiles) return false;
-
-        try {
-          await navigator.share({
-            files: [shareFile],
-            title: "Escala de Calificaciones",
-            text: "Escala generada con el asistente CK.",
-          });
-          return true;
-        } catch (error) {
-          return error?.name === "AbortError";
-        }
-      }
-
       function syncPresetToInput() {
         const preset = els.exigencyPreset.value;
         if (preset === "custom") {
-          // Mostrar caja solo en modo personalizado; no tocamos el valor que ya tenga
           els.exigencyBox.classList.remove("is-hidden");
           return;
         }
@@ -744,41 +680,6 @@
       els.btnContrast.addEventListener("click", () => {
         const isOn = document.body.classList.toggle("high-contrast");
         els.btnContrast.setAttribute("aria-pressed", String(isOn));
-      });
-
-      els.btnCapture.addEventListener("click", async () => {
-        const node = document.getElementById("capturable");
-        if (!window.html2canvas || !node) return;
-
-        els.btnCapture.disabled = true;
-        try {
-          const canvas = await html2canvas(node, {
-            scale: window.devicePixelRatio > 1 ? 3 : 2,
-            useCORS: true,
-            backgroundColor: getComputedStyle(document.body).getPropertyValue("--bg") || "#0b0c10",
-          });
-          const blob = await canvasToBlob(canvas);
-          const now = new Date();
-          const stamp =
-            String(now.getFullYear()) +
-            String(now.getMonth() + 1).padStart(2, "0") +
-            String(now.getDate()).padStart(2, "0") +
-            "_" +
-            String(now.getHours()).padStart(2, "0") +
-            String(now.getMinutes()).padStart(2, "0");
-          const exigency = getExigency();
-          const filename = `escala_${exigency}pct_${stamp}.png`;
-
-          const shared = await shareBlob(blob, filename);
-          if (!shared) {
-            downloadBlob(blob, filename);
-          }
-        } catch (error) {
-          console.error("No se pudo generar la captura", error);
-          alert("No se pudo generar la captura. Intenta nuevamente.");
-        } finally {
-          els.btnCapture.disabled = false;
-        }
       });
 
       els.btnPrint.addEventListener("click", () => window.print());
