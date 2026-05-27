@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Escala de Calificaciones – Generador</title>
     <!-- Tracking API-Visitas (reemplazar URL en producción: ej: https://api-visitas.vercel.app) -->
-    <script src="http://localhost:3000/track?project=calificaciones-py&page=index" async></script>
+    <script src="https://api-visitas-ei0d.onrender.com/track?project=calificaciones-py&page=index" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -726,7 +726,7 @@ async function descargarTabla() {
 
 // ─── WhatsApp Compartir ─────────────────────────────────
 const SHARE_KEY = 'calif_compartidos';
-const VISITAS_API = (document.querySelector('script[src*="/track?"]')?.src?.split('/track?')[0]) || 'http://localhost:3000';
+const VISITAS_API = (document.querySelector('script[src*="/track?"]')?.src?.split('/track?')[0]) || 'https://api-visitas-ei0d.onrender.com';
 
 function getShareCount() {
     return parseInt(localStorage.getItem(SHARE_KEY) || '0', 10);
