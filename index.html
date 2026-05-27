@@ -7,6 +7,8 @@
   <meta name="description" content="Generador interactivo de escalas de calificaciones con calculadora para alumnos y soporte directo de impresión/PDF.">
   <!-- Tracking API-Visitas (reemplazar URL en producción) -->
   <script src="http://localhost:3000/track?project=calificaciones-py&page=index" async></script>
+  <!-- Captura a PNG -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-Q4pvTvOROqOGGxs6MlQ2W/tyPH2sMRf0LcPsyLm2IMw=" crossorigin="anonymous"></script>
   <style>
     :root {
       --bg: #0b0c10;
@@ -364,6 +366,10 @@
             <span aria-hidden="true">⚫️</span>
             <span>Alto contraste</span>
           </button>
+          <button id="btnCapture" class="secondary" type="button" title="Descargar imagen de la escala y resultados" aria-label="Capturar imagen de la escala">
+            <span aria-hidden="true">📷</span>
+            <span>Capturar (PNG)</span>
+          </button>
           <button id="btnPrint" class="secondary" type="button" title="Imprimir o guardar como PDF" aria-label="Imprimir o guardar escala como PDF">
             <span aria-hidden="true">🖨️</span>
             <span>Imprimir / PDF</span>
@@ -469,6 +475,7 @@
         tbody: $("#tbody"),
         tableWrap: $("#tableWrap"),
         btnGenerate: $("#btnGenerate"),
+        btnCapture: $("#btnCapture"),
         btnPrint: $("#btnPrint"),
         btnContrast: $("#btnContrast"),
         calcTotal: $("#calcTotal"),
@@ -685,6 +692,29 @@
       });
 
       els.btnPrint.addEventListener("click", () => window.print());
+
+      els.btnCapture.addEventListener("click", async () => {
+        const node = document.getElementById("capturable");
+        if (!window.html2canvas || !node) return;
+
+        try {
+          els.btnCapture.disabled = true;
+          els.btnCapture.innerHTML = '<span aria-hidden="true">⏳</span><span>Procesando...</span>';
+
+          const canvas = await html2canvas(node, { scale: 2, useCORS: true });
+          const link = document.createElement("a");
+          const exigency = getExigency();
+          const stamp = new Date().toISOString().slice(0, 10);
+          link.download = `escala_${exigency}pct_${stamp}.png`;
+          link.href = canvas.toDataURL("image/png");
+          link.click();
+        } catch (err) {
+          console.error("Error al capturar:", err);
+        } finally {
+          els.btnCapture.disabled = false;
+          els.btnCapture.innerHTML = '<span aria-hidden="true">📷</span><span>Capturar (PNG)</span>';
+        }
+      });
 
       // Inicialización
       syncPresetToInput();

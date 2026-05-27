@@ -5,7 +5,7 @@
   "description": "Generador estático de escalas de calificaciones listo para desplegar en Vercel.",
   "scripts": {
     "dev": "serve . -l 4173",
-    "build": "shx rm -rf dist && shx mkdir -p dist && shx cp index.html dist/index.html",
+    "build": "shx rm -rf dist && shx mkdir -p dist && shx cp *.html dist/",
     "lint": "html-validate index.html",
     "deploy": "npm run build && vercel --prod"
   },
