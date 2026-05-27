@@ -633,29 +633,30 @@ async function descargarTabla() {
     const exigencia = exigMatch ? exigMatch[1] : '';
 
     const captura = document.createElement('div');
-    captura.style.cssText = 'display:inline-block;padding:10px 14px;background:#fff;font-family:Arial,sans-serif;';
+    captura.style.cssText = 'display:inline-block;padding:14px 18px;background:#f8f9fa;font-family:Arial,sans-serif;border-radius:6px;';
     captura.innerHTML = `
-        <div style="font-size:12px;font-weight:700;color:#000;margin-bottom:6px;">Escala de Calificaciones</div>
-        <table style="border-collapse:collapse;width:auto;font-size:10px;color:#000;">
+        <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:8px;letter-spacing:0.3px;">Escala de Calificaciones</div>
+        <table style="border-collapse:collapse;width:auto;font-size:11px;color:#475569;">
             <thead>
                 <tr>
-                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Calificación</th>
-                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Descriptor</th>
-                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Rango</th>
+                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Calificación</th>
+                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Descriptor</th>
+                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Rango</th>
                 </tr>
             </thead>
             <tbody>
-                ${Array.from(tabla.querySelectorAll('tbody tr')).map(tr => {
+                ${Array.from(tabla.querySelectorAll('tbody tr')).map((tr, i) => {
                     const celdas = tr.querySelectorAll('td');
+                    const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
                     return `<tr>
-                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;text-align:center;">${celdas[0]?.textContent || ''}</td>
-                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;">${celdas[1]?.textContent || ''}</td>
-                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;text-align:center;">${celdas[2]?.textContent || ''}</td>
+                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;text-align:center;">${celdas[0]?.textContent || ''}</td>
+                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;">${celdas[1]?.textContent || ''}</td>
+                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;text-align:center;">${celdas[2]?.textContent || ''}</td>
                     </tr>`;
                 }).join('')}
             </tbody>
         </table>
-        <div style="font-size:9px;color:#000;margin-top:5px;">Total de puntos (N): ${total} | Exigencia: ${exigencia}%</div>
+        <div style="font-size:9px;color:#64748b;margin-top:6px;">Total de puntos (N): ${total} | Exigencia: ${exigencia}%</div>
     `;
 
     captura.style.position = 'fixed';
@@ -664,7 +665,7 @@ async function descargarTabla() {
     document.body.appendChild(captura);
 
     try {
-        const canvas = await html2canvas(captura, {scale:2,useCORS:true,backgroundColor:'#ffffff'});
+        const canvas = await html2canvas(captura, {scale:2,useCORS:true,backgroundColor:'#f8f9fa'});
         const link = document.createElement('a');
         link.download = `escala-calificaciones-${Date.now()}.png`;
         link.href = canvas.toDataURL('image/png');
