@@ -118,6 +118,30 @@ body {
     color: #fff;
 }
 .btn-primary:hover { background: var(--accent-hover); }
+.btn-whatsapp {
+    background: rgba(37,211,102,.15);
+    color: #25d366;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.btn-whatsapp:hover { background: #25d366; color: #fff; }
+.share-counter {
+    font-size: 11px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.share-counter .num { font-weight: 700; color: var(--accent-2, #22c55e); }
 .btn.ativo {
     background: var(--accent);
     color: #fff;
@@ -223,6 +247,12 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         <div class="top-actions">
             <button class="btn" id="btn-contraste">⚫ Alto contraste</button>
             <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
+            <button class="btn-whatsapp" id="btn-whatsapp">
+                <span>📤 Compartir</span>
+                <span class="share-counter" id="share-badge">
+                    <span class="num" id="share-count">0</span>
+                </span>
+            </button>
         </div>
     </div>
 
@@ -640,6 +670,41 @@ async function descargarTabla() {
         captura.remove();
     }
 }
+
+// ─── WhatsApp Compartir ─────────────────────────────────
+const SHARE_KEY = 'calif_compartidos';
+const VISITAS_API = (document.querySelector('script[src*="/track?"]')?.src?.split('/track?')[0]) || 'http://localhost:3000';
+
+function getShareCount() {
+    return parseInt(localStorage.getItem(SHARE_KEY) || '0', 10);
+}
+
+function setShareCount(n) {
+    localStorage.setItem(SHARE_KEY, String(n));
+    document.getElementById('share-count').textContent = n;
+}
+
+function trackShare() {
+    const params = new URLSearchParams({ project: 'calificaciones-py', page: 'compartido' });
+    fetch(`${VISITAS_API}/track?${params}`, { mode: 'no-cors' }).catch(() => {});
+}
+
+document.getElementById('btn-whatsapp').addEventListener('click', function () {
+    const url = encodeURIComponent(window.location.href);
+    const texto = encodeURIComponent(
+        '📊 Escala de Calificaciones - Generador MEC Paraguay\n\n' +
+        'Generá tus escalas de calificaciones y calculá notas fácilmente.\n\n' +
+        '🔗 ' + window.location.href
+    );
+    window.open(`https://wa.me/?text=${texto}`, '_blank', 'width=700,height=600');
+
+    // Incrementar contador local
+    setShareCount(getShareCount() + 1);
+    trackShare();
+});
+
+// Inicializar contador
+document.getElementById('share-count').textContent = getShareCount();
 
 // Auto-generate on load
 actualizarTotalLabel();
