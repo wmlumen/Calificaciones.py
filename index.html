@@ -1,726 +1,649 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <title>Escala de Calificaciones – Generador</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Generador interactivo de escalas de calificaciones con calculadora para alumnos y soporte directo de impresión/PDF.">
-  <!-- Tracking API-Visitas (reemplazar URL en producción) -->
-  <script src="http://localhost:3000/track?project=calificaciones-py&page=index" async></script>
-  <!-- Captura a PNG -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" integrity="sha256-Q4pvTvOROqOGGxs6MlQ2W/tyPH2sMRf0LcPsyLm2IMw=" crossorigin="anonymous"></script>
-  <style>
-    :root {
-      --bg: #0b0c10;
-      --card: #121318;
-      --muted: #8892a6;
-      --text: #e9edf3;
-      --accent: #5cc8ff;
-      --accent-2: #70e1a1;
-      --danger: #ff7676;
-      --border: #1f2230;
-    }
-      
-    * {
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Inter, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
-    }
-
-    a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    h1,
-    h2,
-    h3 {
-      margin: 0 0 0.6rem;
-    }
-
-    .wrap {
-      max-width: 1200px;
-      margin: 24px auto;
-      padding: 0 16px 32px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-    }
-
-    .header {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1.2fr 0.8fr;
-      align-items: start;
-    }
-
-    .school {
-      font-weight: 600;
-      letter-spacing: 0.3px;
-      color: var(--muted);
-      font-size: 14px;
-      margin-top: 2px;
-    }
-
-    .controls {
-      display: grid;
-      gap: 8px;
-      grid-template-columns: repeat(3, minmax(120px, 1fr));
-    }
-
-    .controls-primary {
-      margin-top: 14px;
-    }
-
-    .control {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    label {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    input[type="number"],
-    input[type="text"],
-    select {
-      background: #0e0f14;
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      outline: none;
-    }
-
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .hint {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .row-actions {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-      margin-top: 6px;
-    }
-
-    .row-actions--end {
-      justify-content: flex-end;
-    }
-
-    button {
-      background: var(--accent);
-      border: none;
-      color: #00141f;
-      padding: 10px 14px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-    }
-
-    button.secondary {
-      background: #18202c;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    button.ghost {
-      background: transparent;
-      color: var(--accent);
-      border: 1px dashed var(--accent);
-    }
-
-    button.danger {
-      background: var(--danger);
-      color: #330;
-    }
-
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    .advanced {
-      margin-top: 12px;
-      display: none;
-    }
-
-    .advanced.show {
-      display: block;
-    }
-
-    .advanced .controls {
-      grid-template-columns: repeat(8, minmax(120px, 1fr));
-    }
-
-    .table-wrap {
-      margin-top: 16px;
-      overflow-x: auto;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      display: none;
-    }
-
-    .sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      border: 0;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      table-layout: fixed;
-    }
-
-    th,
-    td {
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border);
-      word-break: break-word;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      background: #0f1016;
-      z-index: 2;
-    }
-
-    thead th:first-child {
-      position: sticky;
-      left: 0;
-      z-index: 3;
-    }
-
-    tbody td:first-child {
-      position: sticky;
-      left: 0;
-      background: #0f1016;
-      font-weight: 700;
-    }
-
-    thead tr th,
-    tbody td {
-      white-space: normal;
-    }
-
-    tbody td {
-      font-variant-numeric: tabular-nums;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .tag {
-      display: inline-block;
-      padding: 2px 8px;
-      font-size: 12px;
-      border-radius: 999px;
-      background: #0d1822;
-      color: var(--accent);
-      border: 1px solid #143246;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 4px 8px;
-      background: #0f1c13;
-      color: var(--accent-2);
-      border: 1px solid #183122;
-      border-radius: 8px;
-      font-size: 12px;
-    }
-
-    .calc {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(120px, 1fr));
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .calc-title {
-      margin-top: 16px;
-    }
-
-    .result {
-      margin-top: 8px;
-      padding: 12px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: #0e1016;
-    }
-
-    .result strong {
-      font-size: 18px;
-    }
-
-    .footer {
-      margin-top: 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--muted);
-      font-size: 13px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .credits {
-      font-weight: 700;
-      color: var(--accent-2);
-      white-space: nowrap;
-    }
-
-    .warn {
-      color: #ffd080;
-    }
-
-    .is-hidden {
-      display: none !important;
-    }
-
-    @media (max-width: 900px) {
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      .calc {
-        grid-template-columns: 1fr;
-      }
-
-      .header {
-        grid-template-columns: 1fr;
-      }
-
-      .credits {
-        white-space: normal;
-      }
-    }
-      .high-contrast {
-      --bg: #000000;
-      --card: #000000;
-      --text: #ffffff;
-      --muted: #f5f5f5;
-      --accent: #ffff00;
-      --accent-2: #00ffff;
-      --danger: #ff6666;
-      --border: #ffffff;
-    }
-
-    .high-contrast table th,
-    .high-contrast table td {
-      border-bottom: 1px solid #ffffff;
-    }
-
-    .high-contrast .card {
-      box-shadow: 0 0 0 2px #ffffff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de Calificaciones – Generador</title>
+    <!-- Tracking API-Visitas (reemplazar URL en producción: ej: https://api-visitas.vercel.app) -->
+    <script src="http://localhost:3000/track?project=calificaciones-py&page=index" async></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-border: rgba(255,255,255,.08);
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-soft: rgba(59,130,246,.15);
+    --success: #22c55e;
+    --danger: #ef4444;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    --table-border: #334155;
+    --table-header: #1e293b;
+    --table-row-alt: #1a2332;
+    --badge-bg: rgba(59,130,246,.2);
+    --badge-text: #60a5fa;
+    --radius: 12px;
+    --radius-lg: 20px;
+}
+.high-contrast {
+    --bg: #000;
+    --card: #111;
+    --card-border: #444;
+    --text: #fff;
+    --muted: #bbb;
+    --accent: #ffd700;
+    --accent-hover: #ffed4a;
+    --accent-soft: rgba(255,215,0,.25);
+    --success: #0f0;
+    --danger: #f00;
+    --input-bg: #000;
+    --input-border: #555;
+    --table-border: #555;
+    --table-header: #111;
+    --table-row-alt: #0a0a0a;
+    --badge-bg: rgba(255,215,0,.3);
+    --badge-text: #ffd700;
+}
+* { box-sizing: border-box; }
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 24px 16px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.container {
+    max-width: 820px;
+    width: 100%;
+}
+.card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+    margin-bottom: 24px;
+}
+.card-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+.card-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 20px;
+}
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+}
+.top-bar h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+    margin: 0;
+}
+.top-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.btn {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 7px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s;
+    font-family: inherit;
+}
+.btn:hover { background: var(--accent); color: #fff; }
+.btn-primary {
+    background: var(--accent);
+    color: #fff;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+.btn.ativo {
+    background: var(--accent);
+    color: #fff;
+}
+.form-group { margin-bottom: 18px; }
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+.form-group .help {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+}
+input[type="number"] {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: .2s;
+}
+input[type="number"]:focus { border-color: var(--accent); }
+input:disabled { opacity: .5; }
+.exigencia-opts {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+th {
+    background: var(--table-header);
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--table-border);
+}
+td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--table-border);
+}
+tr:nth-child(even) td { background: var(--table-row-alt); }
+.badge {
+    display: inline-block;
+    background: var(--badge-bg);
+    color: var(--badge-text);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.result-box {
+    margin-top: 16px;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.result-box .nota {
+    font-size: 32px;
+    color: var(--accent);
+}
+.result-box .desc {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+}
+@media print {
+    body { background: #fff !important; color: #000 !important; }
+    .card { background: #fff !important; border: 1px solid #ccc !important; }
+    .top-actions .btn { display: none; }
+    #btn-contraste { display: none; }
+}
+@media (max-width: 600px) {
+    .card { padding: 20px 16px; }
+    .top-bar h1 { font-size: 22px; }
+}
+</style>
 </head>
 <body>
-  <div class="wrap" id="capturable">
-    <div class="card">
-  <header class="header" aria-label="Cabecera principal">
-        <div>
-          <h1>Escala de Calificaciones</h1>
-          <p class="school" id="infoLine">
-            Criterios generales de promoción · Nivel de exigencia:
-            <span class="tag" id="exigencyTag">70%</span>
-          </p>
+<div class="container">
+    <div class="top-bar">
+        <h1>Escala de Calificaciones</h1>
+        <div class="top-actions">
+            <button class="btn" id="btn-contraste">⚫ Alto contraste</button>
+            <button class="btn" onclick="window.print()">🖨️ Imprimir / PDF</button>
         </div>
-        <div class="row-actions row-actions--end">
-          <button id="btnContrast" class="secondary" type="button" title="Alternar alto contraste" aria-pressed="false">
-            <span aria-hidden="true">⚫️</span>
-            <span>Alto contraste</span>
-          </button>
-          <button id="btnCapture" class="secondary" type="button" title="Descargar imagen de la escala y resultados" aria-label="Capturar imagen de la escala">
-            <span aria-hidden="true">📷</span>
-            <span>Capturar (PNG)</span>
-          </button>
-          <button id="btnPrint" class="secondary" type="button" title="Imprimir o guardar como PDF" aria-label="Imprimir o guardar escala como PDF">
-            <span aria-hidden="true">🖨️</span>
-            <span>Imprimir / PDF</span>
-          </button>
-        </div>
-      </header>
-
-      <!-- Controles principales -->
-  <section class="controls controls-primary" aria-labelledby="controlsHeading" aria-label="Parámetros principales">
-        <h2 id="controlsHeading" class="sr-only">Parámetros principales</h2>
-        <div class="control">
-          <label for="totalPts">Total de puntos (N)</label>
-          <input type="number" id="totalPts" value="30" min="1">
-          <div class="hint">Es el puntaje total de la prueba (ej.: 30 puntos).</div>
-        </div>
-
-        <div class="control">
-          <label for="exigencyPreset">Nivel de exigencia (preestablecido)</label>
-          <select id="exigencyPreset">
-            <option value="50">50%</option>
-            <option value="60">60%</option>
-            <option value="70" selected>70%</option>
-            <option value="80">80%</option>
-            <option value="custom">Personalizado</option>
-          </select>
-          <div class="hint">Selecciona 50, 60, 70 u 80%. Luego puedes ajustar manualmente.</div>
-        </div>
-
-        <div class="control is-hidden" id="exigencyBox">
-          <label for="exigencyInput">Nivel de exigencia (%)</label>
-          <input type="number" id="exigencyInput" value="70" min="1" max="99">
-          <div class="hint">Solo se edita en modo personalizado.</div>
-        </div>
-      </section>
-
-      <div class="row-actions">
-        <button id="btnGenerate" type="button">Generar tabla</button>
-        <span class="muted">
-          Muestra la escala numérica para un único total de puntos usando el método oficial (límite inferior + regla de residuos).
-        </span>
-      </div>
-
-      <!-- Tabla -->
-  <section class="table-wrap" id="tableWrap" aria-labelledby="tableHeading" aria-label="Tabla generada">
-        <h2 id="tableHeading" class="sr-only">Tabla generada</h2>
-        <table id="scaleTable">
-          <thead id="thead"></thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </section>
-
-      <!-- Calculadora -->
-      <h3 class="calc-title" id="calcHeading">Calculadora para el alumno</h3>
-  <section class="calc" aria-labelledby="calcHeading" aria-label="Calculadora para el alumno">
-        <div class="control">
-          <label for="calcTotal">Total de puntos (N)</label>
-          <input type="number" id="calcTotal" min="1" value="30">
-        </div>
-        <div class="control">
-          <label for="calcScore">Puntaje alcanzado (A)</label>
-          <input type="number" id="calcScore" min="0" value="0">
-        </div>
-        <div class="control">
-          <label>&nbsp;</label>
-          <button id="btnCalc" type="button">Calcular</button>
-        </div>
-        <div class="control">
-          <label>&nbsp;</label>
-          <div class="hint">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
-        </div>
-      </section>
-
-      <div class="result" id="calcResult" role="status" aria-live="polite">
-        <strong>Calificación:</strong> —<br>
-        <span class="muted">Ingresa el puntaje del alumno para ver el resultado en esta casilla.</span>
-      </div>
-
-      <footer class="footer">
-        <p class="muted">
-          Basado en las **Exigencias del Sistema de Evaluación de la Educación Básica – EPJA** según el Ministerio de Educación y Ciencias (MEC).<br>
-          Fuente oficial: *Sistema de Evaluación – Educación Básica EPJA*. Disponible en el MEC.
-        </p>
-        <p class="credits">CK, 2025 — Deyhut</p>
-      </footer>
     </div>
-  </div>
 
-  <script>
-    (function () {
-      const $ = (s) => document.querySelector(s);
+    <!-- GENERADOR -->
+    <div class="card" style="padding:24px 24px 20px;">
+        <div class="card-title" style="margin-bottom:4px;">Parámetros principales</div>
+        <div class="card-sub" style="margin-bottom:12px;">Criterios generales de promoción · Nivel de exigencia: <strong id="exigencia-label">70%</strong></div>
 
-      const numberName = (n) => ["", "Uno", "Dos", "Tres", "Cuatro", "Cinco"][n] || "";
-      const descriptor = (n) => ["", "Insuficiente", "Aceptable", "Bueno", "Muy bueno", "Excelente"][n] || "";
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:130px;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
+                <input type="number" id="total-puntos" value="30" min="1" max="1000" style="padding:8px 12px;font-size:14px;">
+                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 30 pts).</div>
+            </div>
+            <div style="flex:2;min-width:200px;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
+                <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
+                    <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
+                    <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
+                    <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
+                    <button class="btn" data-v="80" style="padding:5px 12px;font-size:12px;">80%</button>
+                    <button class="btn" data-v="custom" style="padding:5px 12px;font-size:12px;">Personalizado</button>
+                    <input type="number" id="exigencia-valor" value="70" min="1" max="99" disabled style="width:65px;padding:5px 8px;font-size:13px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;">
+                </div>
+                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Preset 50–80% o ingresa valor manual en Personalizado.</div>
+            </div>
+        </div>
 
-      const els = {
-        infoLine: $("#infoLine"),
-        exigencyTag: $("#exigencyTag"),
-        totalPts: $("#totalPts"),
-        exigencyPreset: $("#exigencyPreset"),
-        exigencyBox: $("#exigencyBox"),
-        exigencyInput: $("#exigencyInput"),
-        thead: $("#thead"),
-        tbody: $("#tbody"),
-        tableWrap: $("#tableWrap"),
-        btnGenerate: $("#btnGenerate"),
-        btnCapture: $("#btnCapture"),
-        btnPrint: $("#btnPrint"),
-        btnContrast: $("#btnContrast"),
-        calcTotal: $("#calcTotal"),
-        calcScore: $("#calcScore"),
-        btnCalc: $("#btnCalc"),
-        calcResult: $("#calcResult"),
-      };
+        <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
 
-      function clampInt(x, lo, hi) {
-        x = Math.round(x);
-        return Math.max(lo, Math.min(hi, x));
-      }
+        <div id="tabla-wrapper" style="margin-top:16px;">
+            <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
+            <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
+            <div id="tabla-contenido" style="overflow-x:auto;"></div>
+            <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+    </div>
 
-      function getExigency() {
-        let p = parseFloat(els.exigencyInput.value || "70");
-        if (isNaN(p)) p = 70;
-        if (p < 1) p = 1;
-        if (p > 99) p = 99;
-        els.exigencyInput.value = String(p);
-        els.exigencyTag.textContent = `${p}%`;
-        return p;
-      }
+    <!-- CALCULADORA -->
+    <div class="card">
+        <div class="card-title" style="margin-bottom:4px;">Calculadora para el alumno</div>
+        <div class="card-sub" style="margin-bottom:12px;">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
 
-      function syncPresetToInput() {
-        const preset = els.exigencyPreset.value;
-        if (preset === "custom") {
-          els.exigencyBox.classList.remove("is-hidden");
-          return;
-        }
-        els.exigencyBox.classList.add("is-hidden");
-        els.exigencyInput.value = preset;
-        getExigency();
-      }
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:120px;">
+                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Puntaje alcanzado (A)</label>
+                <input type="number" id="calc-puntaje" value="" min="0" max="1000" placeholder="Ingrese el puntaje" style="padding:8px 12px;font-size:14px;">
+                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total de puntos (N): <strong id="calc-total-label">30</strong> (mismo de arriba)</div>
+            </div>
+            <div style="display:flex;align-items:flex-end;">
+                <button class="btn btn-primary" id="btn-calcular" style="padding:8px 20px;font-size:14px;height:38px;">Calcular</button>
+            </div>
+        </div>
 
-      /**
-       * Algoritmo oficial (ejemplo con N = 30):
-       * - Límite inferior (LI) = N * %exigencia (regla de tres). Se redondea hacia arriba.
-       * - Límite superior (LS) = N (total de puntos).
-       * - Cantidad de puntos entre LI y LS (incluidos): LS - LI + 1.
-       * - Se divide esa cantidad por 4 (calificaciones 2,3,4,5) → cociente y residuo.
-       * - Cada calificación recibe "cociente" puntos; el residuo se reparte según la regla de los residuos:
-       *   · residuo 1 → +1 a la calificación 3
-       *   · residuo 2 → +1 a 3 y +1 a 4
-       *   · residuo 3 → +1 a 3, +1 a 4 y +1 a 2
-       * - La calificación 1 va de 1 hasta LI - 1.
-       */
-      function computeRangesForN(N, exigencyPct) {
-        if (N <= 0) {
-          return ["—", "—", "—", "—", "—", { li: 0, ls: 0, ranges: [] }];
-        }
+        <div class="result-box" id="resultado-calcular" style="margin-top:12px;padding:12px 16px;min-height:44px;font-size:15px;">
+            <span style="color:var(--muted);font-weight:400;font-size:13px;">Calificación: —</span>
+        </div>
+        <div class="help" style="text-align:center;font-size:11px;margin-top:6px;">Ingresa el puntaje del alumno para ver el resultado.</div>
+    </div>
 
-        const LS = N;
-        let LI = Math.ceil((exigencyPct / 100) * N);
-        if (LI < 1) LI = 1;
-        if (LI > LS) LI = LS; // caso extremo
+    <div style="text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);line-height:1.7;">
+        Este material <strong>NO está autorizado ni validado</strong> por el Ministerio de Educación y Ciencias (MEC) de Paraguay.<br>
+        Se presenta únicamente como un ejercicio matemático y algorítmico, diseñado para apoyar al Docente, orientar al Padre y guiar al Alumno en la comprensión objetiva de las escalas de calificaciones.<br><br>
+        Su propósito es acercar a la verdad de los puntajes y sus equivalencias, ofreciendo una herramienta práctica y transparente que facilita el análisis y la interpretación de los resultados académicos.<br><br>
+        Contacto: <a href="#" onclick="abrirContacto();return false;" style="color:var(--accent);text-decoration:none;">wmlumen@gmail.com</a>
+    </div>
+</div>
 
-        let points = LS - LI + 1;
+<!-- Modal Contacto -->
+<div id="modal-contacto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:32px;max-width:480px;width:100%;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div style="font-size:20px;font-weight:700;">Contacto</div>
+            <button onclick="cerrarContacto()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0;line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;">&times;</button>
+        </div>
+        <form id="form-contacto" action="https://formsubmit.co/wmlumen@gmail.com" method="POST">
+            <input type="hidden" name="_subject" value="Contacto desde Escala de Calificaciones">
+            <input type="hidden" name="_captcha" value="true">
+            <input type="hidden" name="_next" value="https://calificaciones-py.vercel.app/?ok=1">
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Nombre</label>
+                <input type="text" name="Nombre" id="cont-nombre" placeholder="Tu nombre" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tu correo</label>
+                <input type="email" name="Correo" id="cont-email" placeholder="tucorreo@ejemplo.com" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tema</label>
+                <textarea name="Mensaje" id="cont-tema" placeholder="Describe tu consulta..." required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;resize:vertical;min-height:90px;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;">Enviar mensaje</button>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Se abrirá una pestaña de confirmación. Revisa también tu bandeja de spam.</div>
+        </form>
+    </div>
+</div>
 
-        if (points <= 0) {
-          const r1 = [1, N];
-          const empty = [0, -1];
-          return [fmtRange(r1, 1, N), "—", "—", "—", "—", { li: LI, ls: LS, ranges: [r1, empty, empty, empty, empty] }];
-        }
+<script>
+function abrirContacto() { document.getElementById('modal-contacto').style.display = 'flex'; }
+function cerrarContacto() { document.getElementById('modal-contacto').style.display = 'none'; }
+document.getElementById('form-contacto').addEventListener('submit', function() {
+    setTimeout(() => { cerrarContacto(); this.reset(); }, 1000);
+});
+// cerrar al hacer clic fuera
+document.getElementById('modal-contacto').addEventListener('click', function(e) { if (e.target === this) cerrarContacto(); });
 
+const descriptores = {1:'Insuficiente',2:'Aceptable',3:'Bueno',4:'Muy bueno',5:'Excelente'};
+
+function calcularEscala(N, exigenciaPct) {
+    const LS = N;
+    let LI = Math.ceil((exigenciaPct / 100) * N);
+    if (LI < 1) LI = 1;
+    if (LI > LS) LI = LS;
+
+    let points = LS - LI + 1;
+    const ranges = {};
+
+    if (points <= 0) {
+        ranges[1] = [1, N];
+        ranges[2] = ranges[3] = ranges[4] = ranges[5] = null;
+    } else {
         const base = Math.floor(points / 4);
         let rem = points % 4;
-
-        const sizes = [base, base, base, base]; // [2,3,4,5]
-
-        if (rem === 1) {
-          sizes[1] += 1; // +1 a 3
-        } else if (rem === 2) {
-          sizes[1] += 1; // +1 a 3
-          sizes[2] += 1; // +1 a 4
-        } else if (rem === 3) {
-          sizes[1] += 1; // +1 a 3
-          sizes[2] += 1; // +1 a 4
-          sizes[0] += 1; // +1 a 2
-        }
+        const sizes = [base, base, base, base];
+        if (rem === 1) sizes[1] += 1;
+        else if (rem === 2) { sizes[1] += 1; sizes[2] += 1; }
+        else if (rem === 3) { sizes[1] += 1; sizes[2] += 1; sizes[0] += 1; }
 
         let remaining = points;
         for (let i = 0; i < sizes.length; i++) {
-          if (remaining <= 0) {
-            sizes[i] = 0;
-          } else if (sizes[i] === 0 && remaining > 0) {
-            sizes[i] = 1;
-            remaining -= 1;
-          } else {
-            remaining -= sizes[i];
-          }
+            if (remaining <= 0) sizes[i] = 0;
+            else if (sizes[i] === 0 && remaining > 0) { sizes[i] = 1; remaining -= 1; }
+            else remaining -= sizes[i];
         }
 
         let start = LI;
-        const seg2 = sizes[0] > 0 ? [start, start + sizes[0] - 1] : [start, start - 1];
-        start = seg2[1] + 1;
-        const seg3 = sizes[1] > 0 ? [start, start + sizes[1] - 1] : [start, start - 1];
-        start = seg3[1] + 1;
-        const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : [start, start - 1];
-        start = seg4[1] + 1;
-        const seg5 = sizes[3] > 0 ? [start, LS] : [start, start - 1];
-
+        const seg2 = sizes[0] > 0 ? [start, start + sizes[0] - 1] : null;
+        start = seg2 ? seg2[1] + 1 : start;
+        const seg3 = sizes[1] > 0 ? [start, start + sizes[1] - 1] : null;
+        start = seg3 ? seg3[1] + 1 : start;
+        const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : null;
+        start = seg4 ? seg4[1] + 1 : start;
+        const seg5 = sizes[3] > 0 ? [start, LS] : null;
         const seg1 = [1, LI - 1];
 
-        const r1 = fmtRange(seg1, 1, N);
-        const r2 = fmtRange(seg2, 2, N);
-        const r3 = fmtRange(seg3, 3, N);
-        const r4 = fmtRange(seg4, 4, N);
-        const r5 = fmtRange(seg5, 5, N);
+        ranges[1] = seg1[0] <= seg1[1] ? seg1 : null;
+        ranges[2] = seg2;
+        ranges[3] = seg3;
+        ranges[4] = seg4;
+        ranges[5] = seg5;
+    }
 
-        return [r1, r2, r3, r4, r5, { li: LI, ls: LS, ranges: [seg1, seg2, seg3, seg4, seg5] }];
-      }
+    const escalas = {};
+    for (let i = 1; i <= 5; i++) {
+        const r = ranges[i];
+        escalas[i] = r && r[0] <= r[1] ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}-${r[1]}`) : null;
+    }
 
-      function fmtRange([a, b], grade, N) {
-        a = clampInt(a, 1, N);
-        b = clampInt(b, 1, N);
-        if (a > b) return "—";
-        if (a === b) return `${a} = ${grade}`;
-        return `${a} - ${b} = ${grade}`;
-      }
+    return { total: N, exigencia: exigenciaPct, limite_inferior: LI, limite_superior: LS, escalas, descriptores };
+}
 
-      function generate() {
-        let N = parseInt(els.totalPts.value || "1", 10);
-        if (isNaN(N) || N < 1) N = 1;
-        els.totalPts.value = String(N);
+function calcularCalificacion(N, scoreRaw, exigenciaPct) {
+    const LS = N;
+    let LI = Math.ceil((exigenciaPct / 100) * N);
+    if (LI < 1) LI = 1;
+    if (LI > LS) LI = LS;
 
-        const exigency = getExigency();
+    let points = LS - LI + 1;
+    let grade = 1;
+    const porcentaje = (scoreRaw / N) * 100;
 
-        els.tableWrap.style.display = "block";
-        els.thead.innerHTML = "";
-        els.tbody.innerHTML = "";
+    if (points > 0) {
+        const base = Math.floor(points / 4);
+        let rem = points % 4;
+        const sizes = [base, base, base, base];
+        if (rem === 1) sizes[1] += 1;
+        else if (rem === 2) { sizes[1] += 1; sizes[2] += 1; }
+        else if (rem === 3) { sizes[1] += 1; sizes[2] += 1; sizes[0] += 1; }
 
-        const trh = document.createElement("tr");
-        const th0 = document.createElement("th");
-        th0.textContent = "ESCALA DE CALIFICACIONES";
-        trh.appendChild(th0);
-
-        const th = document.createElement("th");
-        th.textContent = `${N} puntos`;
-        trh.appendChild(th);
-
-        els.thead.appendChild(trh);
-
-        const grades = [1, 2, 3, 4, 5];
-        const [r1, r2, r3, r4, r5] = computeRangesForN(N, exigency);
-        const rowRanges = [r1, r2, r3, r4, r5];
-
-        grades.forEach((grade, idx) => {
-          const tr = document.createElement("tr");
-          const td0 = document.createElement("td");
-          td0.innerHTML = `<strong>${grade}</strong>`;
-          tr.appendChild(td0);
-
-          const td = document.createElement("td");
-          td.textContent = rowRanges[idx];
-          tr.appendChild(td);
-
-          els.tbody.appendChild(tr);
-        });
-
-        // Sincronizamos también la calculadora con este N
-        els.calcTotal.value = String(N);
-      }
-
-      function calculate() {
-        const total = parseInt(els.calcTotal.value || "0", 10);
-        const scoreRaw = parseInt(els.calcScore.value || "0", 10);
-
-        if (!(total > 0)) {
-          els.calcResult.innerHTML = '<span class="warn">Ingresa un total de puntos válido (N &gt; 0).</span>';
-          return;
+        let remaining = points;
+        for (let i = 0; i < sizes.length; i++) {
+            if (remaining <= 0) sizes[i] = 0;
+            else if (sizes[i] === 0 && remaining > 0) { sizes[i] = 1; remaining -= 1; }
+            else remaining -= sizes[i];
         }
 
-        const exigency = getExigency();
-        const inRange = clampInt(scoreRaw, 0, total);
-        if (inRange !== scoreRaw) {
-          els.calcResult.innerHTML = `<span class="warn">Se ajustó el puntaje a ${inRange}/${total} para estar dentro del rango.</span>`;
+        let start = LI;
+        const seg2 = sizes[0] > 0 ? [start, start + sizes[0] - 1] : null;
+        start = seg2 ? seg2[1] + 1 : start;
+        const seg3 = sizes[1] > 0 ? [start, start + sizes[1] - 1] : null;
+        start = seg3 ? seg3[1] + 1 : start;
+        const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : null;
+        start = seg4 ? seg4[1] + 1 : start;
+        const seg5 = sizes[3] > 0 ? [start, LS] : null;
+
+        const ranges = [[1, LI - 1], seg2, seg3, seg4, seg5];
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            if (range && scoreRaw >= range[0] && scoreRaw <= range[1]) { grade = i + 1; break; }
         }
+    }
 
-        const [r1, r2, r3, r4, r5, meta] = computeRangesForN(total, exigency);
-        const ranges = meta.ranges;
-        const seg1 = ranges[0];
-        const seg2 = ranges[1];
-        const seg3 = ranges[2];
-        const seg4 = ranges[3];
-        const seg5 = ranges[4];
+    return { calificacion: grade, descriptor: descriptores[grade], porcentaje: parseFloat(porcentaje.toFixed(2)) };
+}
 
-        let grade = 1;
-        if (inRange >= seg5[0] && inRange <= seg5[1]) grade = 5;
-        else if (inRange >= seg4[0] && inRange <= seg4[1]) grade = 4;
-        else if (inRange >= seg3[0] && inRange <= seg3[1]) grade = 3;
-        else if (inRange >= seg2[0] && inRange <= seg2[1]) grade = 2;
-        else if (inRange >= seg1[0] && inRange <= seg1[1]) grade = 1;
+let exigenciaActual = 70;
 
-        const pct = (inRange / total) * 100;
-        const txt = `${grade} (${numberName(grade)}) – ${descriptor(grade)}`;
+function selExigencia(v) {
+    const btns = document.querySelectorAll('#exigencia-opts .btn');
+    btns.forEach(b => b.classList.remove('ativo'));
+    const customInput = document.getElementById('exigencia-valor');
+    if (v === 'custom') {
+        btns[4].classList.add('ativo');
+        customInput.disabled = false;
+        customInput.focus();
+        exigenciaActual = parseInt(customInput.value) || 70;
+    } else {
+        const idx = {50:0,60:1,70:2,80:3}[v];
+        if (idx !== undefined) btns[idx].classList.add('ativo');
+        customInput.disabled = true;
+        exigenciaActual = parseInt(v, 10);
+        customInput.value = v;
+    }
+    document.getElementById('exigencia-label').textContent = exigenciaActual + '%';
+    autoGenerar();
+}
 
-        els.calcResult.innerHTML = `
-          <strong>Calificación:</strong> ${txt}<br>
-          Puntaje: <strong>${inRange}</strong> / ${total}
-          &nbsp;(<span class="muted">${pct.toFixed(2)}%</span>)<br>
-          Nivel de exigencia: <span class="muted">${exigency}%</span><br>
-        `;
-      }
+function getExigencia() {
+    const custom = document.getElementById('exigencia-valor');
+    return !custom.disabled ? (parseInt(custom.value) || 70) : exigenciaActual;
+}
 
-      // Eventos
-      els.exigencyPreset.addEventListener("change", syncPresetToInput);
-      els.exigencyInput && els.exigencyInput.addEventListener("input", getExigency);
-      els.btnGenerate.addEventListener("click", generate);
-      els.btnCalc.addEventListener("click", calculate);
+document.getElementById('exigencia-opts').addEventListener('click', e => {
+    const btn = e.target.closest('.btn');
+    if (btn) { selExigencia(btn.dataset.v); autoGenerar(); }
+});
 
-      els.btnContrast.addEventListener("click", () => {
-        const isOn = document.body.classList.toggle("high-contrast");
-        els.btnContrast.setAttribute("aria-pressed", String(isOn));
-      });
+document.getElementById('exigencia-valor').addEventListener('input', function() {
+    if (!this.disabled) {
+        exigenciaActual = parseInt(this.value) || 1;
+        document.getElementById('exigencia-label').textContent = exigenciaActual + '%';
+        autoGenerar();
+    }
+});
 
-      els.btnPrint.addEventListener("click", () => window.print());
+function autoGenerar() {
+    const t = valNum(document.getElementById('total-puntos').value, 1, 1000);
+    const ex = getExigencia();
+    if (t.ok && ex >= 1 && ex <= 99) generarTabla();
+}
 
-      els.btnCapture.addEventListener("click", async () => {
-        const node = document.getElementById("capturable");
-        if (!window.html2canvas || !node) return;
+function valNum(v, min, max) {
+    const n = parseInt(v, 10);
+    if (isNaN(n) || n < min) return {ok:false,msg:'Debe ser ≥ ' + min};
+    if (n > max) return {ok:false,msg:'Debe ser ≤ ' + max};
+    return {ok:true,val:n};
+}
 
+function generarTabla() {
+    const totalEl = document.getElementById('total-puntos');
+    const totalV = totalEl ? totalEl.value : '';
+    const t = valNum(totalV, 1, 1000);
+    if (!t.ok) return mostrarErrorTabla('Total de puntos: ' + t.msg);
+
+    const ex = getExigencia();
+    if (ex < 1 || ex > 99) return mostrarErrorTabla('Nivel de exigencia debe estar entre 1 y 99.');
+
+    const data = calcularEscala(t.val, ex);
+    const esc = data.escalas;
+
+    let html = '<table><thead><tr><th>Calificación</th><th>Descriptor</th><th>Rango de puntos</th></tr></thead><tbody>';
+    for (let i = 1; i <= 5; i++) {
+        html += `<tr><td><strong>${i}</strong></td><td>${descriptores[i]}</td><td>${esc[i] || '—'}</td></tr>`;
+    }
+    html += '</tbody></table>';
+
+    document.getElementById('tabla-meta').innerHTML = `
+        <span>Límite inferior: <strong>${data.limite_inferior}</strong> &nbsp;|&nbsp;
+        Límite superior: <strong>${data.limite_superior}</strong> &nbsp;|&nbsp;
+        Exigencia: <strong>${data.exigencia}%</strong> &nbsp;|&nbsp;
+        Total de puntos: <strong>${data.total}</strong></span>
+        <button class="btn" onclick="descargarTabla()" style="white-space:nowrap;">⬇ Descargar tabla</button>
+    `;
+
+    document.getElementById('tabla-error').style.display = 'none';
+    document.getElementById('tabla-contenido').innerHTML = html;
+}
+
+function mostrarErrorTabla(msg) {
+    document.getElementById('tabla-error').style.display = 'block';
+    document.getElementById('tabla-error').textContent = '⚠ ' + msg;
+    document.getElementById('tabla-contenido').innerHTML = '';
+}
+
+function actualizarTotalLabel() {
+    const v = document.getElementById('total-puntos').value;
+    document.getElementById('calc-total-label').textContent = v || '—';
+}
+
+document.getElementById('total-puntos').addEventListener('input', function() {
+    actualizarTotalLabel();
+    autoGenerar();
+});
+
+function calcularNota() {
+    const totalEl = document.getElementById('total-puntos');
+    const puntEl = document.getElementById('calc-puntaje');
+    const totalV = totalEl ? totalEl.value : '';
+    const puntV = puntEl ? puntEl.value : '';
+
+    const t = valNum(totalV, 1, 1000);
+    if (!t.ok) return mostrarResultado('Total de puntos: ' + t.msg, false);
+
+    if (puntV === '') return mostrarResultado('Ingresa el puntaje del alumno', false);
+    const p = parseInt(puntV, 10);
+    if (isNaN(p) || p < 0) return mostrarResultado('Puntaje debe ser ≥ 0', false);
+    if (p > t.val) return mostrarResultado('Puntaje no puede superar el total', false);
+
+    const ex = getExigencia();
+    if (ex < 1 || ex > 99) return mostrarResultado('Nivel de exigencia inválido', false);
+
+    const res = calcularCalificacion(t.val, p, ex);
+    mostrarResultado(`<span class="nota">${res.calificacion}</span> <span class="desc">– ${res.descriptor} (${res.porcentaje}%)</span>`, true);
+}
+
+function mostrarResultado(html, ok) {
+    const box = document.getElementById('resultado-calcular');
+    box.innerHTML = html;
+    box.style.background = ok ? 'var(--accent-soft)' : 'rgba(239,68,68,.1)';
+    box.style.borderColor = ok ? 'var(--accent)' : 'var(--danger)';
+}
+
+document.getElementById('btn-generar').addEventListener('click', generarTabla);
+document.getElementById('btn-calcular').addEventListener('click', calcularNota);
+
+document.getElementById('calc-puntaje').addEventListener('keydown', e => { if (e.key === 'Enter') calcularNota(); });
+document.getElementById('total-puntos').addEventListener('keydown', e => { if (e.key === 'Enter') generarTabla(); });
+
+let contrasteActivo = false;
+document.getElementById('btn-contraste').addEventListener('click', function() {
+    contrasteActivo = !contrasteActivo;
+    document.body.classList.toggle('high-contrast', contrasteActivo);
+    this.textContent = contrasteActivo ? '⚫ Contraste normal' : '⚫ Alto contraste';
+});
+
+async function descargarTabla() {
+    if (typeof html2canvas === 'undefined') {
+        const btn = document.querySelector('#tabla-meta button');
+        if (btn) btn.textContent = '⏳ Cargando...';
         try {
-          els.btnCapture.disabled = true;
-          els.btnCapture.innerHTML = '<span aria-hidden="true">⏳</span><span>Procesando...</span>';
-
-          const canvas = await html2canvas(node, { scale: 2, useCORS: true });
-          const link = document.createElement("a");
-          const exigency = getExigency();
-          const stamp = new Date().toISOString().slice(0, 10);
-          link.download = `escala_${exigency}pct_${stamp}.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-        } catch (err) {
-          console.error("Error al capturar:", err);
-        } finally {
-          els.btnCapture.disabled = false;
-          els.btnCapture.innerHTML = '<span aria-hidden="true">📷</span><span>Capturar (PNG)</span>';
+            await new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                s.onload = resolve;
+                s.onerror = reject;
+                document.head.appendChild(s);
+            });
+        } catch (e) {
+            if (btn) btn.textContent = '⬇ Descargar tabla';
+            alert('No se pudo cargar la librería para generar la imagen.');
+            return;
         }
-      });
+        if (btn) btn.textContent = '⬇ Descargar tabla';
+    }
 
-      // Inicialización
-      syncPresetToInput();
-      getExigency();
-      generate();
-    })();
-  </script>
+    const tabla = document.querySelector('#tabla-contenido table');
+    if (!tabla) return;
+
+    const meta = document.getElementById('tabla-meta');
+    const metaSpan = meta ? meta.querySelector('span') : null;
+    const metaText = metaSpan ? metaSpan.textContent : '';
+    const totalMatch = metaText.match(/Total de puntos:\s*(\d+)/);
+    const exigMatch = metaText.match(/Exigencia:\s*(\d+)%/);
+    const total = totalMatch ? totalMatch[1] : '';
+    const exigencia = exigMatch ? exigMatch[1] : '';
+
+    const captura = document.createElement('div');
+    captura.style.cssText = 'display:inline-block;padding:10px 14px;background:#fff;font-family:Arial,sans-serif;';
+    captura.innerHTML = `
+        <div style="font-size:12px;font-weight:700;color:#000;margin-bottom:6px;">Escala de Calificaciones</div>
+        <table style="border-collapse:collapse;width:auto;font-size:10px;color:#000;">
+            <thead>
+                <tr>
+                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Calificación</th>
+                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Descriptor</th>
+                    <th style="padding:3px 12px;border-bottom:1px solid #000;text-align:left;font-weight:600;">Rango</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${Array.from(tabla.querySelectorAll('tbody tr')).map(tr => {
+                    const celdas = tr.querySelectorAll('td');
+                    return `<tr>
+                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;text-align:center;">${celdas[0]?.textContent || ''}</td>
+                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;">${celdas[1]?.textContent || ''}</td>
+                        <td style="padding:2px 12px;border-bottom:1px solid #ccc;text-align:center;">${celdas[2]?.textContent || ''}</td>
+                    </tr>`;
+                }).join('')}
+            </tbody>
+        </table>
+        <div style="font-size:9px;color:#000;margin-top:5px;">Total de puntos (N): ${total} | Exigencia: ${exigencia}%</div>
+    `;
+
+    captura.style.position = 'fixed';
+    captura.style.left = '-9999px';
+    captura.style.top = '0';
+    document.body.appendChild(captura);
+
+    try {
+        const canvas = await html2canvas(captura, {scale:2,useCORS:true,backgroundColor:'#ffffff'});
+        const link = document.createElement('a');
+        link.download = `escala-calificaciones-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    } finally {
+        captura.remove();
+    }
+}
+
+// Auto-generate on load
+actualizarTotalLabel();
+generarTabla();
+</script>
 </body>
 </html>
