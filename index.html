@@ -235,8 +235,49 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
     #btn-contraste { display: none; }
 }
 @media (max-width: 600px) {
-    .card { padding: 20px 16px; }
-    .top-bar h1 { font-size: 22px; }
+    body { padding: 12px 8px; }
+    .card { padding: 16px 12px; margin-bottom: 16px; }
+    .card-title { font-size: 18px; }
+    .card-sub { font-size: 12px; }
+    .top-bar { flex-direction: column; align-items: stretch; gap: 8px; }
+    .top-bar h1 { font-size: 20px; text-align: center; }
+    .top-actions { justify-content: center; }
+    .top-actions .btn,
+    .top-actions .btn-whatsapp { padding: 10px 14px; font-size: 14px; min-height: 44px; }
+    input[type="number"] { font-size: 16px; padding: 12px 14px; min-height: 44px; }
+    #exigencia-opts .btn { padding: 10px 12px; font-size: 14px; min-height: 44px; }
+    #exigencia-valor { width: 80px; padding: 10px 8px; font-size: 16px; min-height: 44px; }
+    #btn-generar { padding: 12px; font-size: 16px; min-height: 48px; }
+    #btn-calcular { padding: 12px 20px; font-size: 16px; min-height: 44px; }
+    #calc-puntaje { font-size: 16px; padding: 12px 14px; min-height: 44px; }
+    .result-box { font-size: 16px; padding: 14px; min-height: 48px; }
+    .result-box .nota { font-size: 26px; }
+    .form-group label { font-size: 14px; }
+    .form-group .help { font-size: 12px; }
+    #tabla-contenido { margin: 0 -8px; }
+    #tabla-contenido table { font-size: 13px; min-width: 320px; }
+    #tabla-contenido th,
+    #tabla-contenido td { padding: 8px 10px; }
+    #tabla-meta { font-size: 11px; flex-direction: column; align-items: stretch; gap: 8px; }
+    #tabla-meta button { width: 100%; padding: 10px; min-height: 44px; }
+    #modal-contacto > div { padding: 20px; margin: 10px; max-width: 100%; border-radius: 16px; }
+    #modal-contacto input,
+    #modal-contacto textarea { font-size: 16px; padding: 12px 14px; min-height: 44px; }
+    #modal-contacto button[type="submit"] { padding: 14px; font-size: 16px; min-height: 48px; }
+    .footer, .container > div:last-child { font-size: 12px; padding: 16px 8px; line-height: 1.5; }
+
+    /* WhatsApp button mobile */
+    .btn-whatsapp svg { width: 20px; height: 20px; }
+    .share-counter .num { font-size: 14px; }
+
+    /* Fix modal close button touch */
+    #modal-contacto button[onclick*="cerrar"] { width: 44px; height: 44px; font-size: 28px; }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+    .card { padding: 24px 20px; }
+    .top-bar h1 { font-size: 24px; }
+    input[type="number"] { font-size: 15px; }
 }
 </style>
 </head>
@@ -267,7 +308,7 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
             <div style="flex:1;min-width:130px;">
                 <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
-                <input type="number" id="total-puntos" value="30" min="1" max="1000" style="padding:8px 12px;font-size:14px;">
+                <input type="number" id="total-puntos" value="30" min="1" max="1000" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
                 <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 30 pts).</div>
             </div>
             <div style="flex:2;min-width:200px;">
@@ -694,13 +735,21 @@ function trackShare() {
 }
 
 document.getElementById('btn-whatsapp').addEventListener('click', function () {
-    const url = encodeURIComponent(window.location.href);
     const texto = encodeURIComponent(
         '📊 Escala de Calificaciones\n\n' +
         'Generá tus escalas de calificaciones y calculá notas fácilmente.\n\n' +
         '🔗 ' + window.location.href
     );
-    window.open(`https://wa.me/?text=${texto}`, '_blank', 'width=700,height=600');
+    const waUrl = `https://wa.me/?text=${texto}`;
+
+    // Mobile: navegación directa (evita popup blocker)
+    // Desktop: popup centrado
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.location.href = waUrl;
+    } else {
+        window.open(waUrl, '_blank', 'width=700,height=600');
+    }
 
     // Incrementar contador local
     setShareCount(getShareCount() + 1);
