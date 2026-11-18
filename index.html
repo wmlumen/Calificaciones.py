@@ -437,246 +437,193 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         <button class="tab-link" data-tab="tab-excel" role="tab" aria-selected="false" id="tab-btn-excel">
             <span>📗</span> Excel
         </button>
-        <button class="tab-link" data-tab="tab-mapa" role="tab" aria-selected="false" id="tab-btn-mapa">
-            <span>🗺️</span> Mapa de Ubicación
-        </button>
     </nav>
 
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- PESTAÑA 1: ESCALA & CALCULADORA                     -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <div id="tab-escala" class="tab-pane active" role="tabpanel" aria-labelledby="tab-btn-escala">
-        <!-- GENERADOR DE ESCALA -->
-        <div class="card" style="padding:24px 24px 20px;">
-            <div class="card-title" style="margin-bottom:4px;">Parámetros principales</div>
-            <div class="card-sub" style="margin-bottom:12px;">Criterios generales de promoción · Nivel de exigencia: <strong id="exigencia-label">70%</strong></div>
+    <!-- CONTENIDO DE LA APLICACIÓN -->
+    <div class="content-wrapper">
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- PESTAÑA 1: ESCALA & CALCULADORA                     -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div id="tab-escala" class="tab-pane active" role="tabpanel" aria-labelledby="tab-btn-escala">
+            <!-- GENERADOR DE ESCALA -->
+            <div class="card" style="padding:24px 24px 20px;">
+                <div class="card-title" style="margin-bottom:4px;">Parámetros principales</div>
+                <div class="card-sub" style="margin-bottom:12px;">Criterios generales de promoción · Nivel de exigencia: <strong id="exigencia-label">70%</strong></div>
 
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-                <div style="flex:1;min-width:130px;">
-                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
-                    <input type="number" id="total-puntos" value="30" min="1" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
-                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 30 pts).</div>
-                </div>
-                <div style="flex:2;min-width:200px;">
-                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
-                    <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
-                        <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
-                        <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
-                        <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
-                        <button class="btn" data-v="80" style="padding:5px 12px;font-size:12px;">80%</button>
-                        <button class="btn" data-v="custom" style="padding:5px 12px;font-size:12px;">Personalizado</button>
-                        <input type="number" id="exigencia-valor" value="70" min="1" max="99" disabled style="width:65px;padding:5px 8px;font-size:13px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;">
+                <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+                    <div style="flex:1;min-width:130px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
+                        <input type="number" id="total-puntos" value="30" min="1" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 12 pts) o ingresa valor manual en Personalizado.</div>
                     </div>
-                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Preset 50–80% o ingresa valor manual en Personalizado.</div>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
-
-            <div id="tabla-wrapper" style="margin-top:16px;">
-                <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
-                <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
-                <div id="tabla-contenido" style="overflow-x:auto;"></div>
-                <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
-            </div>
-        </div>
-
-        <!-- CALCULADORA PARA EL ALUMNO -->
-        <div class="card">
-            <div class="card-title" style="margin-bottom:4px;">Calculadora para el alumno</div>
-            <div class="card-sub" style="margin-bottom:12px;">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
-
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
-                <div style="flex:1;min-width:120px;">
-                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Puntaje alcanzado (A)</label>
-                    <input type="number" id="calc-puntaje" value="" min="0" placeholder="Ingrese el puntaje" style="padding:8px 12px;font-size:14px;">
-                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total de puntos (N): <strong id="calc-total-label">30</strong> (mismo de arriba)</div>
-                </div>
-                <div style="display:flex;align-items:flex-end;">
-                    <button class="btn btn-primary" id="btn-calcular" style="padding:8px 20px;font-size:14px;height:38px;">Calcular</button>
-                </div>
-            </div>
-
-            <div class="result-box" id="resultado-calcular" style="margin-top:12px;padding:12px 16px;min-height:44px;font-size:15px;">
-                <span style="color:var(--muted);font-weight:400;font-size:13px;">Calificación: —</span>
-            </div>
-            <div class="help" style="text-align:center;font-size:11px;margin-top:6px;">Ingresa el puntaje del alumno para ver el resultado.</div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- PESTAÑA 2: FÓRMULAS EXCEL                           -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <div id="tab-excel" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-excel">
-        <div class="card">
-            <div class="card-title">Fórmulas para Microsoft Excel & Google Sheets</div>
-            <div class="card-sub">
-                Generadas en tiempo real de acuerdo a la escala activa: <strong>Total <span id="excel-total-badge">30</span> pts</strong> y <strong>Exigencia <span id="excel-exigencia-badge">70%</span></strong>.
-            </div>
-
-            <!-- Panel de Configuración de la Celda -->
-            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;background:var(--input-bg);padding:14px;border-radius:var(--radius);border:1px solid var(--card-border);">
-                <div style="min-width:120px;max-width:160px;">
-                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">
-                        📌 Celda del puntaje
-                    </label>
-                    <input type="text" id="excel-celda" value="A2" maxlength="6" placeholder="A2" style="padding:8px 12px;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:1px;width:100%;text-align:center;">
-                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Ej.: A2, B2, C2…</div>
-                </div>
-                <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.6;padding-left:8px;">
-                    Indica en qué celda de tu planilla está el <strong style="color:var(--text);">puntaje del alumno</strong>.<br>
-                    Las fórmulas se generan automáticamente. Solo copiá y pegá en Excel.
-                </div>
-            </div>
-
-            <!-- FÓRMULA 1: CALIFICACIÓN NUMÉRICA -->
-            <div class="formula-box">
-                <div class="formula-header">
-                    <div>
-                        <span class="badge" style="background:rgba(34,197,94,.15);color:#22c55e;">Nota Numérica</span>
-                        <strong style="margin-left:6px;font-size:14px;">Calificación del 1 al 5</strong>
-                    </div>
-                    <button class="btn btn-primary" id="btn-copiar-num" onclick="copiarFormulaTexto('excel-formula-num', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
-                        <span>📋 Copiar fórmula</span>
-                    </button>
-                </div>
-                <pre id="excel-formula-num" class="formula-code"></pre>
-            </div>
-
-            <!-- FÓRMULA 2: DESCRIPTOR CUALITATIVO -->
-            <div class="formula-box">
-                <div class="formula-header">
-                    <div>
-                        <span class="badge" style="background:rgba(168,85,247,.15);color:#a855f7;">Descriptor MEC</span>
-                        <strong style="margin-left:6px;font-size:14px;">Insuficiente, Aceptable, Bueno, Muy bueno, Excelente</strong>
-                    </div>
-                    <button class="btn btn-primary" id="btn-copiar-desc" onclick="copiarFormulaTexto('excel-formula-desc', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
-                        <span>📋 Copiar fórmula</span>
-                    </button>
-                </div>
-                <pre id="excel-formula-desc" class="formula-code"></pre>
-            </div>
-
-            <!-- VISTA PREVIA INTERACTIVA EN PLANILLA -->
-            <div style="margin-top:22px;">
-                <div class="card-title" style="font-size:16px;margin-bottom:4px;">Simulación en vivo de tu planilla</div>
-                <div class="card-sub" style="margin-bottom:12px;">Así evaluará Excel los puntajes según la celda <strong id="preview-celda-label">A2</strong>:</div>
-
-                <div id="excel-preview-wrapper" style="overflow-x:auto;"></div>
-
-                <div style="margin-top:14px;padding:14px 18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);font-size:12px;line-height:1.6;color:var(--text);">
-                    <strong style="color:var(--accent);">💡 ¿Cómo aplicarla paso a paso en Excel?</strong><br>
-                    1. Presioná <strong>Copiar fórmula</strong> en la opción deseada (numérica o descriptor).<br>
-                    2. En tu archivo Excel, hacé clic en la celda donde va la calificación (por ejemplo <code>B2</code> si el puntaje está en <code>A2</code>).<br>
-                    3. Pegá la fórmula presionando <code>Ctrl + V</code> y tocá <code>Enter</code>.<br>
-                    4. Hacé doble clic en la esquina inferior derecha de la celda <code>B2</code> para extender la fórmula a todos los alumnos de la lista.
-                </div>
-
-                <div style="margin-top:10px;padding:10px 14px;background:rgba(100,100,100,.08);border-radius:var(--radius);font-size:11px;line-height:1.5;color:var(--muted);">
-                    💬 <strong>¿Usás Excel en inglés?</strong> Reemplazá <code>SI.CONJUNTO</code> por <code>IFS</code> y <code>SI</code> por <code>IF</code>, y cambiá los <code>;</code> por <code>,</code>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════ -->
-    <!-- PESTAÑA 3: MAPA DE UBICACIÓN                        -->
-    <!-- ═══════════════════════════════════════════════════ -->
-    <div id="tab-mapa" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-mapa">
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
-                <div>
-                    <div class="card-title" style="margin-bottom:4px;">Mapa de Ubicación de Usuarios</div>
-                    <div class="card-sub" style="margin-bottom:0;">
-                        Visualización en tiempo real de los accesos y consultas a la aplicación.
+                    <div style="flex:2;min-width:200px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
+                            <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
+                            <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
+                            <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
+                            <button class="btn" data-v="80" style="padding:5px 12px;font-size:12px;">80%</button>
+                            <button class="btn" data-v="custom" style="padding:5px 12px;font-size:12px;">Personalizado</button>
+                            <input type="number" id="exigencia-valor" value="70" min="1" max="99" disabled style="width:65px;padding:5px 8px;font-size:13px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;">
+                        </div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Preset 50–80% o ingresa valor manual en Personalizado.</div>
                     </div>
                 </div>
-                <button class="btn" onclick="recargarMapaUsuarios()" id="btn-recargar-mapa" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
-                    🔄 Actualizar mapa
-                </button>
-            </div>
 
-            <!-- Contenedor del Mapa Leaflet -->
-            <div id="mapa-wrapper" style="position:relative;width:100%;height:380px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--card-border);background:var(--input-bg);">
-                <div id="mapa-leaflet" style="width:100%;height:100%;"></div>
-                <div id="mapa-loading" style="position:absolute;inset:0;background:rgba(15,23,42,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:500;color:var(--text);font-size:13px;pointer-events:none;transition:opacity .3s ease;">
-                    <span style="font-size:24px;">📍</span>
-                    <span id="mapa-loading-text">Cargando ubicaciones de usuarios...</span>
+                <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
+
+                <div id="tabla-wrapper" style="margin-top:16px;">
+                    <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
+                    <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
+                    <div id="tabla-contenido" style="overflow-x:auto;"></div>
+                    <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
                 </div>
             </div>
 
-            <!-- Estadísticas Geográficas -->
-            <div id="mapa-stats" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
-                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
-                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Ciudades registradas</div>
-                    <div id="mapa-total-ciudades" style="font-size:22px;font-weight:800;color:var(--accent);margin-top:4px;">0</div>
+            <!-- CALCULADORA PARA EL ALUMNO -->
+            <div class="card">
+                <div class="card-title" style="margin-bottom:4px;">Calculadora para el alumno</div>
+                <div class="card-sub" style="margin-bottom:12px;">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
+
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:120px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Puntaje alcanzado (A)</label>
+                        <input type="number" id="calc-puntaje" value="" min="0" placeholder="Ingrese el puntaje" style="padding:8px 12px;font-size:14px;">
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total de puntos (N): <strong id="calc-total-label">30</strong> (mismo de arriba)</div>
+                    </div>
+                    <div style="display:flex;align-items:flex-end;">
+                        <button class="btn btn-primary" id="btn-calcular" style="padding:8px 20px;font-size:14px;height:38px;">Calcular</button>
+                    </div>
                 </div>
-                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
-                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Países activos</div>
-                    <div id="mapa-total-paises" style="font-size:22px;font-weight:800;color:#22c55e;margin-top:4px;">0</div>
+
+                <div class="result-box" id="resultado-calcular" style="margin-top:12px;padding:12px 16px;min-height:44px;font-size:15px;">
+                    <span style="color:var(--muted);font-weight:400;font-size:13px;">Calificación: —</span>
                 </div>
-                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
-                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Visitas geolocalizadas</div>
-                    <div id="mapa-total-visitas-geo" style="font-size:22px;font-weight:800;color:#f59e0b;margin-top:4px;">0</div>
+                <div class="help" style="text-align:center;font-size:11px;margin-top:6px;">Ingresa el puntaje del alumno para ver el resultado.</div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- PESTAÑA 2: FÓRMULAS EXCEL                           -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div id="tab-excel" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-excel">
+            <div class="card">
+                <div class="card-title">Fórmulas para Microsoft Excel & Google Sheets</div>
+                <div class="card-sub">
+                    Generadas en tiempo real de acuerdo a la escala activa: <strong>Total <span id="excel-total-badge">30</span> pts</strong> y <strong>Exigencia <span id="excel-exigencia-badge">70%</span></strong>.
+                </div>
+
+                <!-- Panel de Configuración de la Celda -->
+                <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:20px;background:var(--input-bg);padding:14px;border-radius:var(--radius);border:1px solid var(--card-border);">
+                    <div style="min-width:120px;max-width:160px;">
+                        <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">
+                            📌 Celda del puntaje
+                        </label>
+                        <input type="text" id="excel-celda" value="A2" maxlength="6" placeholder="A2" style="padding:8px 12px;font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:1px;width:100%;text-align:center;">
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Ej.: A2, B2, C2…</div>
+                    </div>
+                    <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.6;padding-left:8px;">
+                        Indica en qué celda de tu planilla está el <strong style="color:var(--text);">puntaje del alumno</strong>.<br>
+                        Las fórmulas se generan automáticamente. Solo copiá y pegá en Excel.
+                    </div>
+                </div>
+
+                <!-- FÓRMULA 1: CALIFICACIÓN NUMÉRICA -->
+                <div class="formula-box">
+                    <div class="formula-header">
+                        <div>
+                            <span class="badge" style="background:rgba(34,197,94,.15);color:#22c55e;">Nota Numérica</span>
+                            <strong style="margin-left:6px;font-size:14px;">Calificación del 1 al 5</strong>
+                        </div>
+                        <button class="btn btn-primary" id="btn-copiar-num" onclick="copiarFormulaTexto('excel-formula-num', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                            <span>📋 Copiar fórmula</span>
+                        </button>
+                    </div>
+                    <pre id="excel-formula-num" class="formula-code"></pre>
+                </div>
+
+                <!-- FÓRMULA 2: DESCRIPTOR CUALITATIVO -->
+                <div class="formula-box">
+                    <div class="formula-header">
+                        <div>
+                            <span class="badge" style="background:rgba(168,85,247,.15);color:#a855f7;">Descriptor MEC</span>
+                            <strong style="margin-left:6px;font-size:14px;">Insuficiente, Aceptable, Bueno, Muy bueno, Excelente</strong>
+                        </div>
+                        <button class="btn btn-primary" id="btn-copiar-desc" onclick="copiarFormulaTexto('excel-formula-desc', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                            <span>📋 Copiar fórmula</span>
+                        </button>
+                    </div>
+                    <pre id="excel-formula-desc" class="formula-code"></pre>
+                </div>
+
+                <!-- VISTA PREVIA INTERACTIVA EN PLANILLA -->
+                <div style="margin-top:22px;">
+                    <div class="card-title" style="font-size:16px;margin-bottom:4px;">Simulación en vivo de tu planilla</div>
+                    <div class="card-sub" style="margin-bottom:12px;">Así evaluará Excel los puntajes según la celda <strong id="preview-celda-label">A2</strong>:</div>
+
+                    <div id="excel-preview-wrapper" style="overflow-x:auto;"></div>
+
+                    <div style="margin-top:14px;padding:14px 18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);font-size:12px;line-height:1.6;color:var(--text);">
+                        <strong style="color:var(--accent);">💡 ¿Cómo aplicarla paso a paso en Excel?</strong><br>
+                        1. Presioná <strong>Copiar fórmula</strong> en la opción deseada (numérica o descriptor).<br>
+                        2. En tu archivo Excel, hacé clic en la celda donde va la calificación (por ejemplo <code>B2</code> si el puntaje está en <code>A2</code>).<br>
+                        3. Pegá la fórmula presionando <code>Ctrl + V</code> y tocá <code>Enter</code>.<br>
+                        4. Hacé doble clic en la esquina inferior derecha de la celda <code>B2</code> para extender la fórmula a todos los alumnos de la lista.
+                    </div>
+
+                    <div style="margin-top:10px;padding:10px 14px;background:rgba(100,100,100,.08);border-radius:var(--radius);font-size:11px;line-height:1.5;color:var(--muted);">
+                        💬 <strong>¿Usás Excel en inglés?</strong> Reemplazá <code>SI.CONJUNTO</code> por <code>IFS</code> y <code>SI</code> por <code>IF</code>, y cambiá los <code>;</code> por <code>,</code>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Lista de Ciudades Principales -->
-            <div id="mapa-top-ciudades-wrapper" style="margin-top:16px;">
-                <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text);">Ciudades con mayor actividad:</div>
-                <div id="mapa-top-ciudades-list" style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;">
-                    <span style="color:var(--muted);font-size:12px;">Cargando registros...</span>
-                </div>
+        <!-- DESCARGO LEGAL Y CONTACTO -->
+        <div style="text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);line-height:1.7;">
+            Este material <strong>NO está autorizado ni validado</strong> por el Ministerio de Educación y Ciencias (MEC) de Paraguay.<br>
+            Se presenta únicamente como un ejercicio matemático y algorítmico, diseñado para apoyar al Docente, orientar al Padre y guiar al Alumno en la comprensión objetiva de las escalas de calificaciones.<br><br>
+            Su propósito es acercar a la verdad de los puntajes y sus equivalencias, ofreciendo una herramienta práctica y transparente que facilita el análisis y la interpretación de los resultados académicos.<br><br>
+            Contacto: <a href="#" onclick="abrirContacto();return false;" style="color:var(--accent);text-decoration:none;">wmlumen@gmail.com</a>
+            <br>
+            <!-- CONTADOR DE VISITAS DIMINUTO -->
+            <div class="visitas-diminuto" id="visitas-footer" title="Contador total de visitas a la aplicación">
+                <span class="visitas-dot"></span>
+                <span class="visitas-label">Visitas:</span>
+                <span class="visitas-num" id="contador-visitas-num">0</span>
             </div>
         </div>
     </div>
 
-    <!-- DESCARGO LEGAL Y CONTACTO -->
-    <div style="text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);line-height:1.7;">
-        Este material <strong>NO está autorizado ni validado</strong> por el Ministerio de Educación y Ciencias (MEC) de Paraguay.<br>
-        Se presenta únicamente como un ejercicio matemático y algorítmico, diseñado para apoyar al Docente, orientar al Padre y guiar al Alumno en la comprensión objetiva de las escalas de calificaciones.<br><br>
-        Su propósito es acercar a la verdad de los puntajes y sus equivalencias, ofreciendo una herramienta práctica y transparente que facilita el análisis y la interpretación de los resultados académicos.<br><br>
-        Contacto: <a href="#" onclick="abrirContacto();return false;" style="color:var(--accent);text-decoration:none;">wmlumen@gmail.com</a>
-        <br>
-        <!-- CONTADOR DE VISITAS DIMINUTO -->
-        <div class="visitas-diminuto" id="visitas-footer" title="Contador total de visitas a la aplicación">
-            <span class="visitas-dot"></span>
-            <span class="visitas-label">Visitas:</span>
-            <span class="visitas-num" id="contador-visitas-num">0</span>
+    <!-- Modal Contacto -->
+    <div id="modal-contacto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:32px;max-width:480px;width:100%;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <div style="font-size:20px;font-weight:700;">Contacto</div>
+                <button onclick="cerrarContacto()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0;line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;">&times;</button>
+            </div>
+            <form id="form-contacto" action="https://formsubmit.co/wmlumen@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Contacto desde Escala de Calificaciones">
+                <input type="hidden" name="_captcha" value="true">
+                <input type="hidden" name="_next" value="https://calificaciones-py.vercel.app/?ok=1">
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Nombre</label>
+                    <input type="text" name="Nombre" id="cont-nombre" placeholder="Tu nombre" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tu correo</label>
+                    <input type="email" name="Correo" id="cont-email" placeholder="tucorreo@ejemplo.com" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+                </div>
+                <div style="margin-bottom:20px;">
+                    <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tema</label>
+                    <textarea name="Mensaje" id="cont-tema" placeholder="Describe tu consulta..." required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;resize:vertical;min-height:90px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;">Enviar mensaje</button>
+                <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Se abrirá una pestaña de confirmación. Revisa también tu bandeja de spam.</div>
+            </form>
         </div>
     </div>
-</div>
 
-<!-- Modal Contacto -->
-<div id="modal-contacto" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1000;align-items:center;justify-content:center;padding:20px;">
-    <div style="background:var(--card);border:1px solid var(--card-border);border-radius:var(--radius-lg);padding:32px;max-width:480px;width:100%;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <div style="font-size:20px;font-weight:700;">Contacto</div>
-            <button onclick="cerrarContacto()" style="background:none;border:none;color:var(--muted);font-size:24px;cursor:pointer;padding:0;line-height:1;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;">&times;</button>
-        </div>
-        <form id="form-contacto" action="https://formsubmit.co/wmlumen@gmail.com" method="POST">
-            <input type="hidden" name="_subject" value="Contacto desde Escala de Calificaciones">
-            <input type="hidden" name="_captcha" value="true">
-            <input type="hidden" name="_next" value="https://calificaciones-py.vercel.app/?ok=1">
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Nombre</label>
-                <input type="text" name="Nombre" id="cont-nombre" placeholder="Tu nombre" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
-            </div>
-            <div style="margin-bottom:16px;">
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tu correo</label>
-                <input type="email" name="Correo" id="cont-email" placeholder="tucorreo@ejemplo.com" required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
-            </div>
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text);">Tema</label>
-                <textarea name="Mensaje" id="cont-tema" placeholder="Describe tu consulta..." required style="width:100%;padding:10px 14px;font-size:15px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;resize:vertical;min-height:90px;"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-size:15px;">Enviar mensaje</button>
-            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Se abrirá una pestaña de confirmación. Revisa también tu bandeja de spam.</div>
-        </form>
-    </div>
-</div>
-
-<script>
+    <script>
 function abrirContacto() { document.getElementById('modal-contacto').style.display = 'flex'; }
 function cerrarContacto() { document.getElementById('modal-contacto').style.display = 'none'; }
 document.getElementById('form-contacto').addEventListener('submit', function() {
@@ -689,7 +636,7 @@ const descriptores = {1:'Insuficiente',2:'Aceptable',3:'Bueno',4:'Muy bueno',5:'
 // ─── CÁLCULO DE ESCALA (MEC PARAGUAY) ───────────────────────
 function calcularEscala(N, exigenciaPct) {
     const LS = N;
-    // Normativa MEC: redondeo simétrico/aritmético al entero más próximo (>= 0.5 sube, < 0.5 baja)
+    // Normativa MEC: redondeo simétrico/aritmético al entero más cercano (>= 0.5 sube, < 0.5 baja)
     let LI = Math.round((exigenciaPct / 100) * N);
     if (LI < 1) LI = 1;
     if (LI > LS) LI = LS;
@@ -732,736 +679,320 @@ function calcularEscala(N, exigenciaPct) {
         ranges[5] = seg5;
     }
 
-    const escalas = {};
-    for (let i = 1; i <= 5; i++) {
-        const r = ranges[i];
-        escalas[i] = r && r[0] <= r[1] ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}-${r[1]}`) : null;
-    }
-
-    return { total: N, exigencia: exigenciaPct, limite_inferior: LI, limite_superior: LS, escalas, descriptores, ranges };
+    return { LI, ranges, points };
 }
 
-function calcularCalificacion(N, scoreRaw, exigenciaPct) {
-    const LS = N;
-    let LI = Math.round((exigenciaPct / 100) * N);
-    if (LI < 1) LI = 1;
-    if (LI > LS) LI = LS;
-
-    let points = LS - LI + 1;
-    let grade = 1;
-    const porcentaje = (scoreRaw / N) * 100;
-
-    if (points > 0) {
-        const base = Math.floor(points / 4);
-        let rem = points % 4;
-        const sizes = [base, base, base, base];
-        if (rem === 1) sizes[1] += 1;
-        else if (rem === 2) { sizes[1] += 1; sizes[2] += 1; }
-        else if (rem === 3) { sizes[1] += 1; sizes[2] += 1; sizes[0] += 1; }
-
-        let remaining = points;
-        for (let i = 0; i < sizes.length; i++) {
-            if (remaining <= 0) sizes[i] = 0;
-            else if (sizes[i] === 0 && remaining > 0) { sizes[i] = 1; remaining -= 1; }
-            else remaining -= sizes[i];
-        }
-
-        let start = LI;
-        const seg2 = sizes[0] > 0 ? [start, start + sizes[0] - 1] : null;
-        start = seg2 ? seg2[1] + 1 : start;
-        const seg3 = sizes[1] > 0 ? [start, start + sizes[1] - 1] : null;
-        start = seg3 ? seg3[1] + 1 : start;
-        const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : null;
-        start = seg4 ? seg4[1] + 1 : start;
-        const seg5 = sizes[3] > 0 ? [start, LS] : null;
-
-        const ranges = [[0, LI - 1], seg2, seg3, seg4, seg5];
-        for (let i = 0; i < ranges.length; i++) {
-            const range = ranges[i];
-            if (range && scoreRaw >= range[0] && scoreRaw <= range[1]) { grade = i + 1; break; }
-        }
-    }
-
-    return { calificacion: grade, descriptor: descriptores[grade], porcentaje: parseFloat(porcentaje.toFixed(2)) };
-}
-
-let exigenciaActual = 70;
-let escalaDataActual = null;
-
-function selExigencia(v) {
-    const btns = document.querySelectorAll('#exigencia-opts .btn');
-    btns.forEach(b => b.classList.remove('ativo'));
-    const customInput = document.getElementById('exigencia-valor');
-    if (v === 'custom') {
-        btns[4].classList.add('ativo');
-        customInput.disabled = false;
-        customInput.focus();
-        exigenciaActual = parseInt(customInput.value) || 70;
-    } else {
-        const idx = {50:0,60:1,70:2,80:3}[v];
-        if (idx !== undefined) btns[idx].classList.add('ativo');
-        customInput.disabled = true;
-        exigenciaActual = parseInt(v, 10);
-        customInput.value = v;
-    }
-    document.getElementById('exigencia-label').textContent = exigenciaActual + '%';
-    autoGenerar();
-}
-
-function getExigencia() {
-    const custom = document.getElementById('exigencia-valor');
-    return !custom.disabled ? (parseInt(custom.value) || 70) : exigenciaActual;
-}
-
-document.getElementById('exigencia-opts').addEventListener('click', e => {
-    const btn = e.target.closest('.btn');
-    if (btn) { selExigencia(btn.dataset.v); autoGenerar(); }
-});
-
-document.getElementById('exigencia-valor').addEventListener('input', function() {
-    if (!this.disabled) {
-        exigenciaActual = parseInt(this.value) || 1;
-        document.getElementById('exigencia-label').textContent = exigenciaActual + '%';
-        autoGenerar();
-    }
-});
-
-function autoGenerar() {
-    const t = valNum(document.getElementById('total-puntos').value, 1);
-    const ex = getExigencia();
-    if (t.ok && ex >= 1 && ex <= 99) generarTabla();
-}
-
-function valNum(v, min, max = Infinity) {
-    const n = parseInt(v, 10);
-    if (isNaN(n) || n < min) return {ok:false,msg:'Debe ser ≥ ' + min};
-    if (max !== undefined && max !== Infinity && n > max) return {ok:false,msg:'Debe ser ≤ ' + max};
-    return {ok:true,val:n};
-}
-
-function generarTabla() {
-    const totalEl = document.getElementById('total-puntos');
-    const totalV = totalEl ? totalEl.value : '';
-    const t = valNum(totalV, 1);
-    if (!t.ok) return mostrarErrorTabla('Total de puntos: ' + t.msg);
-
-    const ex = getExigencia();
-    if (ex < 1 || ex > 99) return mostrarErrorTabla('Nivel de exigencia debe estar entre 1 y 99.');
-
-    escalaDataActual = calcularEscala(t.val, ex);
-    const esc = escalaDataActual.escalas;
-
-    let html = '<table><thead><tr><th>Calificación</th><th>Descriptor</th><th>Rango de puntos</th></tr></thead><tbody>';
-    for (let i = 1; i <= 5; i++) {
-        html += `<tr><td><strong>${i}</strong></td><td>${descriptores[i]}</td><td>${esc[i] || '—'}</td></tr>`;
-    }
-    html += '</tbody></table>';
-
-    document.getElementById('tabla-meta').innerHTML = `
-        <span>Límite inferior: <strong>${escalaDataActual.limite_inferior}</strong> &nbsp;|&nbsp;
-        Límite superior: <strong>${escalaDataActual.limite_superior}</strong> &nbsp;|&nbsp;
-        Exigencia: <strong>${escalaDataActual.exigencia}%</strong> &nbsp;|&nbsp;
-        Total de puntos: <strong>${escalaDataActual.total}</strong></span>
-        <button class="btn" onclick="descargarTabla()" style="white-space:nowrap;">⬇ Descargar tabla</button>
-    `;
-
-    document.getElementById('tabla-error').style.display = 'none';
-    document.getElementById('tabla-contenido').innerHTML = html;
-
-    // Actualizar fórmulas Excel sincrónicamente
-    actualizarFormulasExcel();
-}
-
-function mostrarErrorTabla(msg) {
-    document.getElementById('tabla-error').style.display = 'block';
-    document.getElementById('tabla-error').textContent = '⚠ ' + msg;
-    document.getElementById('tabla-contenido').innerHTML = '';
-}
-
-function actualizarTotalLabel() {
-    const v = document.getElementById('total-puntos').value;
-    document.getElementById('calc-total-label').textContent = v || '—';
-}
-
-document.getElementById('total-puntos').addEventListener('input', function() {
-    actualizarTotalLabel();
-    autoGenerar();
-});
-
-function calcularNota() {
-    const totalEl = document.getElementById('total-puntos');
-    const puntEl = document.getElementById('calc-puntaje');
-    const totalV = totalEl ? totalEl.value : '';
-    const puntV = puntEl ? puntEl.value : '';
-
-    const t = valNum(totalV, 1);
-    if (!t.ok) return mostrarResultado('Total de puntos: ' + t.msg, false);
-
-    if (puntV === '') return mostrarResultado('Ingresa el puntaje del alumno', false);
-    const p = parseInt(puntV, 10);
-    if (isNaN(p) || p < 0) return mostrarResultado('Puntaje debe ser ≥ 0', false);
-    if (p > t.val) return mostrarResultado('Puntaje no puede superar el total', false);
-
-    const ex = getExigencia();
-    if (ex < 1 || ex > 99) return mostrarResultado('Nivel de exigencia inválido', false);
-
-    const res = calcularCalificacion(t.val, p, ex);
-    mostrarResultado(`<span class="nota">${res.calificacion}</span> <span class="desc">– ${res.descriptor} (${res.porcentaje}%)</span>`, true);
-}
-
-function mostrarResultado(html, ok) {
-    const box = document.getElementById('resultado-calcular');
-    box.innerHTML = html;
-    box.style.background = ok ? 'var(--accent-soft)' : 'rgba(239,68,68,.1)';
-    box.style.borderColor = ok ? 'var(--accent)' : 'var(--danger)';
-}
-
-document.getElementById('btn-generar').addEventListener('click', generarTabla);
-document.getElementById('btn-calcular').addEventListener('click', calcularNota);
-
-document.getElementById('calc-puntaje').addEventListener('keydown', e => { if (e.key === 'Enter') calcularNota(); });
-document.getElementById('total-puntos').addEventListener('keydown', e => { if (e.key === 'Enter') generarTabla(); });
-
-// Alto contraste
-let contrasteActivo = false;
-document.getElementById('btn-contraste').addEventListener('click', function() {
-    contrasteActivo = !contrasteActivo;
-    document.body.classList.toggle('high-contrast', contrasteActivo);
-    this.style.opacity = contrasteActivo ? '1' : '0.6';
-    this.title = contrasteActivo ? 'Desactivar alto contraste' : 'Alto contraste';
-    this.setAttribute('aria-label', this.title);
-});
-
-// Descargar tabla PNG
-async function descargarTabla() {
-    if (typeof html2canvas === 'undefined') {
-        const btn = document.querySelector('#tabla-meta button');
-        if (btn) btn.textContent = '⏳ Cargando...';
-        try {
-            await new Promise((resolve, reject) => {
-                const s = document.createElement('script');
-                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                s.onload = resolve;
-                s.onerror = reject;
-                document.head.appendChild(s);
-            });
-        } catch (e) {
-            if (btn) btn.textContent = '⬇ Descargar tabla';
-            alert('No se pudo cargar la librería para generar la imagen.');
-            return;
-        }
-        if (btn) btn.textContent = '⬇ Descargar tabla';
-    }
-
-    const tabla = document.querySelector('#tabla-contenido table');
-    if (!tabla) return;
-
-    const meta = document.getElementById('tabla-meta');
-    const metaSpan = meta ? meta.querySelector('span') : null;
-    const metaText = metaSpan ? metaSpan.textContent : '';
-    const totalMatch = metaText.match(/Total de puntos:\s*(\d+)/);
-    const exigMatch = metaText.match(/Exigencia:\s*(\d+)%/);
-    const total = totalMatch ? totalMatch[1] : '';
-    const exigencia = exigMatch ? exigMatch[1] : '';
-
-    const captura = document.createElement('div');
-    captura.style.cssText = 'display:inline-block;padding:14px 18px;background:#f8f9fa;font-family:Arial,sans-serif;border-radius:6px;';
-    captura.innerHTML = `
-        <div style="font-size:13px;font-weight:700;color:#334155;margin-bottom:8px;letter-spacing:0.3px;">Escala de Calificaciones</div>
-        <table style="border-collapse:collapse;width:auto;font-size:11px;color:#475569;">
+function generarTablaEscala(N, exigenciaPct) {
+    const { LI, ranges, points } = calcularEscala(N, exigenciaPct);
+    const exigenciaRedondeada = Math.round(exigenciaPct);
+    let html = `
+        <table style="width:100%;border-collapse:collapse;">
             <thead>
-                <tr>
-                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Calificación</th>
-                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Descriptor</th>
-                    <th style="padding:4px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;text-align:left;font-weight:600;color:#334155;">Rango</th>
+                <tr style="background:var(--table-header);">
+                    <th style="padding:10px;text-align:left;border:1px solid var(--table-border);">Calificación</th>
+                    <th style="padding:10px;text-align:left;border:1px solid var(--table-border);">Descriptor</th>
+                    <th style="padding:10px;text-align:center;border:1px solid var(--table-border);">Rango de Puntaje</th>
                 </tr>
             </thead>
             <tbody>
-                ${Array.from(tabla.querySelectorAll('tbody tr')).map((tr, i) => {
-                    const celdas = tr.querySelectorAll('td');
-                    const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
-                    return `<tr>
-                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;text-align:center;">${celdas[0]?.textContent || ''}</td>
-                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;">${celdas[1]?.textContent || ''}</td>
-                        <td style="padding:3px 14px;background:${bg};border-bottom:1px solid #e2e8f0;text-align:center;">${celdas[2]?.textContent || ''}</td>
-                    </tr>`;
-                }).join('')}
-            </tbody>
-        </table>
-        <div style="font-size:9px;color:#64748b;margin-top:6px;">Total de puntos (N): ${total} | Exigencia: ${exigencia}%</div>
     `;
 
-    captura.style.position = 'fixed';
-    captura.style.left = '-9999px';
-    captura.style.top = '0';
-    document.body.appendChild(captura);
-
-    try {
-        const canvas = await html2canvas(captura, {scale:2,useCORS:true,backgroundColor:'#f8f9fa'});
-        const link = document.createElement('a');
-        link.download = `escala-calificaciones-${Date.now()}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    } finally {
-        captura.remove();
-    }
-}
-
-// ─── GESTIÓN DE PESTAÑAS (TABS) ─────────────────────────────
-function switchTab(targetTabId) {
-    document.querySelectorAll('.tab-link').forEach(btn => {
-        const isActive = btn.dataset.tab === targetTabId;
-        btn.classList.toggle('active', isActive);
-        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
-    });
-
-    document.querySelectorAll('.tab-pane').forEach(pane => {
-        pane.classList.toggle('active', pane.id === targetTabId);
-    });
-
-    if (targetTabId === 'tab-excel') {
-        actualizarFormulasExcel();
-    } else if (targetTabId === 'tab-mapa') {
-        inicializarMapaUsuarios();
-    }
-}
-
-document.querySelectorAll('.tab-link').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
-
-// ─── PESTAÑA EXCEL: GENERADOR DE FÓRMULAS DINÁMICAS ─────────
-function sanitizarCelda(val) {
-    let limpia = (val || '').toUpperCase().trim();
-    // Validar formato de celda Excel (ej.: A2, B10, AA5)
-    if (!/^[A-Z]{1,3}[1-9][0-9]{0,6}$/.test(limpia)) {
-        limpia = 'A2';
-    }
-    return limpia;
-}
-
-function getLimitesSuperioresEscala(data) {
-    if (!data || !data.ranges) return null;
-    const U = {};
     for (let i = 1; i <= 5; i++) {
-        const r = data.ranges[i];
-        if (r && r.length === 2 && r[1] !== null) {
-            U[i] = r[1];
-        } else {
-            U[i] = null;
+        const rango = ranges[i];
+        const descriptor = descriptores[i] || '—';
+        let rangoTexto = '—';
+        if (rango) {
+            const [inicio, fin] = rango;
+            if (inicio === 0 && fin === N) {
+                rangoTexto = `0 – ${N}`;
+            } else if (inicio === fin) {
+                rangoTexto = inicio.toString();
+            } else {
+                rangoTexto = `${inicio} – ${fin}`;
+            }
         }
+
+        const filaClase = i % 2 === 0 ? ' style="background:var(--table-row-alt);"' : '';
+        html += `
+            <tr${filaClase}>
+                <td style="padding:10px;border:1px solid var(--table-border);">${i} (${i === 1 ? 'Inferior' : i === 2 ? 'Basico' : i === 3 ? 'Satisfactorio' : i === 4 ? 'Avanzado' : 'Superior'})</td>
+                <td style="padding:10px;border:1px solid var(--table-border);">${descriptor}</td>
+                <td style="padding:10px;text-align:center;border:1px solid var(--table-border);">${rangoTexto}</td>
+            </tr>
+        `;
     }
-    // Si la nota 5 no tiene rango específico pero existe total N
-    if (U[5] === null && data.total) U[5] = data.total;
-    return U;
+
+    html += `</tbody></table>`;
+
+    const metaHtml = `
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:10px;">
+            <div style="padding:8px 16px;background:var(--accent-soft);border-radius:8px;border:1px solid var(--accent);">
+                <strong> LI (Indice de Logro):</strong> ${LI} pts • <strong>Exigencia:</strong> ${exigenciaRedondeada}%
+            </div>
+            <div style="padding:8px 16px;background:var(--accent-soft);border-radius:8px;border:1px solid var(--accent);">
+                <strong>Puntos por rango:</strong> ${points} rangos distribuidos
+            </div>
+        </div>
+    `;
+
+    return { html, meta: metaHtml, error: null };
 }
 
-function actualizarFormulasExcel() {
-    if (!escalaDataActual) {
-        const total = parseInt(document.getElementById('total-puntos').value, 10) || 30;
-        const exigencia = getExigencia();
-        escalaDataActual = calcularEscala(total, exigencia);
+function mostrarTablaEscala() {
+    const N = parseInt(document.getElementById('total-puntos').value) || 30;
+    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
+
+    if (isNaN(N) || N < 1) {
+        return { html: '', meta: '', error: 'El valor total de puntos debe ser un número mayor a 0.' };
+    }
+    if (isNaN(exigencia) || exigencia < 1 || exigencia > 99) {
+        return { html: '', meta: '', error: 'El nivel de exigencia debe estar entre 1 y 99%.' };
     }
 
-    const data = escalaDataActual;
-    const total = data.total;
-    const exigencia = data.exigencia;
+    return generarTablaEscala(N, exigencia);
+}
 
-    // Actualizar etiquetas en la pestaña Excel
-    const badgeTot = document.getElementById('excel-total-badge');
-    const badgeEx = document.getElementById('excel-exigencia-badge');
-    if (badgeTot) badgeTot.textContent = total;
-    if (badgeEx) badgeEx.textContent = exigencia + '%';
+function actualizarExigencia(btn, valor) {
+    document.querySelectorAll('.exigencia-opts .btn').forEach(b => b.classList.remove('ativo'));
+    btn.classList.add('ativo');
+    document.getElementById('exigencia-valor').disabled = true;
+    document.getElementById('exigencia-label').textContent = valor + '%';
+    document.getElementById('excel-exigencia-badge').textContent = valor + '%';
+    actualizarTodo();
+}
 
-    const celdaInput = document.getElementById('excel-celda');
-    let celda = sanitizarCelda(celdaInput ? celdaInput.value : 'A2');
-    const sep = ';';
+function activarExigenciaPersonalizada() {
+    document.querySelectorAll('.exigencia-opts .btn').forEach(b => b.classList.remove('ativo'));
+    document.getElementById('exigencia-valor').disabled = false;
+    document.getElementById('exigencia-valor').focus();
+}
 
-    const labelPreview = document.getElementById('preview-celda-label');
-    if (labelPreview) labelPreview.textContent = celda;
-
-    const U = getLimitesSuperioresEscala(data);
-    if (!U || U[1] === null) {
-        document.getElementById('excel-formula-num').textContent = '⚠️ Configura un puntaje total válido para generar la fórmula.';
-        document.getElementById('excel-formula-desc').textContent = '⚠️ Configura un puntaje total válido para generar la fórmula.';
-        return;
+function manejarCambioExigenciaPersonalizada() {
+    const valor = parseInt(document.getElementById('exigencia-valor').value);
+    if (!isNaN(valor) && valor >= 1 && valor <= 99) {
+        document.getElementById('exigencia-label').textContent = valor + '%';
+        document.getElementById('excel-exigencia-badge').textContent = valor + '%';
+        actualizarTodo();
     }
+}
 
-    // Identificar límites activos (1 a 5)
-    // Ej.: U[1]=20, U[2]=22, U[3]=25, U[4]=28, U[5]=30
-    const u1 = U[1];
-    const u2 = U[2] !== null ? U[2] : u1;
-    const u3 = U[3] !== null ? U[3] : u2;
-    const u4 = U[4] !== null ? U[4] : u3;
-    const u5 = U[5] !== null ? U[5] : total;
+function actualizarExcelFormula() {
+    const N = parseInt(document.getElementById('total-puntos').value) || 30;
+    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
+    const celda = document.getElementById('excel-celda').value.toUpperCase();
 
-    // Formato SI.CONJUNTO con protección de celda vacía (estándar Excel en español / Paraguay)
-    const formulaNum = `=SI(${celda}=""${sep} ""${sep} SI.CONJUNTO(${celda}<=${u1}${sep} 1${sep} ${celda}<=${u2}${sep} 2${sep} ${celda}<=${u3}${sep} 3${sep} ${celda}<=${u4}${sep} 4${sep} ${celda}<=${u5}${sep} 5))`;
-    const formulaDesc = `=SI(${celda}=""${sep} ""${sep} SI.CONJUNTO(${celda}<=${u1}${sep} "Insuficiente"${sep} ${celda}<=${u2}${sep} "Aceptable"${sep} ${celda}<=${u3}${sep} "Bueno"${sep} ${celda}<=${u4}${sep} "Muy bueno"${sep} ${celda}<=${u5}${sep} "Excelente"))`;
+    const { LI, ranges, points } = calcularEscala(N, exigencia);
+
+    // FÓRMULA DE CALIFICACIÓN NUMÉRICA: SI.CONJUNTO( A2<=20, 1, A2<=22, 2, A2<=25, 3, A2<=28, 4, A2<=30, 5)
+    const formulaNum = `=SI.CONJUNTO(${celda}<=${ranges[1][1]},1,${celda}<=${ranges[2][1]},2,${celda}<=${ranges[3][1]},3,${celda}<=${ranges[4][1]},4,${celda}<=${ranges[5][1]},5)`;
+
+    // FÓRMULA DE DESCRIPTOR CUALITATIVO: SI.CONJUNTO( A2<=20,"Insuficiente", A2<=22,"Aceptable", A2<=25,"Bueno", A2<=28,"Muy bueno", A2<=30,"Excelente")
+    const formulaDesc = `=SI.CONJUNTO(${celda}<=${ranges[1][1]},"Insuficiente",${celda}<=${ranges[2][1]},"Aceptable",${celda}<=${ranges[3][1]},"Bueno",${celda}<=${ranges[4][1]},"Muy bueno",${celda}<=${ranges[5][1]},"Excelente")`;
 
     document.getElementById('excel-formula-num').textContent = formulaNum;
     document.getElementById('excel-formula-desc').textContent = formulaDesc;
 
-    generarVistaPreviaExcel(celda, data, u1, u2, u3, u4, u5);
+    // GENERAR VISTA PREVIA
+    generarVistaPreviaExcel(celda, ranges);
 }
 
-function generarVistaPreviaExcel(celda, data, u1, u2, u3, u4, u5) {
-    const contenedor = document.getElementById('excel-preview-wrapper');
-    if (!contenedor) return;
+function generarVistaPreviaExcel(celdaTexto, ranges) {
+    const wrapper = document.getElementById('excel-preview-wrapper');
+    let html = `
+        <table style="min-width:600px;border-collapse:collapse;font-family:monospace;font-size:12px;background:#000;color:#0f0;">
+            <thead>
+                <tr>
+                    <th style="border:1px solid #333;padding:8px;text-align:center;background:#111;">${celdaTexto}</th>
+                    <th style="border:1px solid #333;padding:8px;text-align:left;background:#111;">Calificación</th>
+                    <th style="border:1px solid #333;padding:8px;text-align:left;background:#111;">Descriptor</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
 
-    // Obtener ejemplos representativos de cada rango
-    const ejemplos = [
-        { alumno: 'Alumno 1', puntaje: u1 > 0 ? Math.floor(u1 * 0.8) : 0, nota: 1, desc: 'Insuficiente' },
-        { alumno: 'Alumno 2', puntaje: u2, nota: 2, desc: 'Aceptable' },
-        { alumno: 'Alumno 3', puntaje: u3, nota: 3, desc: 'Bueno' },
-        { alumno: 'Alumno 4', puntaje: u4, nota: 4, desc: 'Muy bueno' },
-        { alumno: 'Alumno 5', puntaje: u5, nota: 5, desc: 'Excelente' }
-    ];
+    const ejemplos = [0, Math.floor(ranges[1][1]/2), ranges[1][1], ranges[2] ? Math.floor((ranges[2][1] + ranges[2][0])/2) : null, ranges[3] ? Math.floor((ranges[3][1] + ranges[3][0])/2) : null, ranges[4] ? Math.floor((ranges[4][1] + ranges[4][0])/2) : null, ranges[5] ? Math.floor((ranges[5][1] + ranges[5][0])/2) : null, ranges[5][1]];
 
-    let html = `<table>
-        <thead>
+    for (const ejemplo of ejemplos) {
+        if (ejemplo === null) continue;
+        let calificacion = '—';
+        let descriptor = '—';
+
+        if (ejemplo <= ranges[1][1]) {
+            calificacion = '1';
+            descriptor = 'Insuficiente';
+        } else if (ejemplo <= ranges[2][1]) {
+            calificacion = '2';
+            descriptor = 'Aceptable';
+        } else if (ejemplo <= ranges[3][1]) {
+            calificacion = '3';
+            descriptor = 'Bueno';
+        } else if (ejemplo <= ranges[4][1]) {
+            calificacion = '4';
+            descriptor = 'Muy bueno';
+        } else if (ejemplo <= ranges[5][1]) {
+            calificacion = '5';
+            descriptor = 'Excelente';
+        }
+
+        html += `
             <tr>
-                <th style="width:25%;">Estudiante</th>
-                <th style="width:25%;">Celda ${celda} (Puntaje)</th>
-                <th style="width:25%;">Resultado Numérico</th>
-                <th style="width:25%;">Resultado Descriptor</th>
+                <td style="border:1px solid #333;padding:6px;text-align:center;">${ejemplo}</td>
+                <td style="border:1px solid #333;padding:6px;">${calificacion}</td>
+                <td style="border:1px solid #333;padding:6px;">${descriptor}</td>
             </tr>
-        </thead>
-        <tbody>`;
-
-    ejemplos.forEach(item => {
-        html += `<tr>
-            <td>${item.alumno}</td>
-            <td><strong>${item.puntaje}</strong> pts</td>
-            <td><strong style="color:var(--accent);font-size:15px;">${item.nota}</strong></td>
-            <td><span class="badge" style="background:${item.nota >= 2 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)'};color:${item.nota >= 2 ? '#22c55e' : '#ef4444'};">${item.desc}</span></td>
-        </tr>`;
-    });
+        `;
+    }
 
     html += `</tbody></table>`;
-    contenedor.innerHTML = html;
+    wrapper.innerHTML = html;
 }
 
-function copiarFormulaTexto(elementId, btn) {
-    const pre = document.getElementById(elementId);
-    if (!pre) return;
-    const texto = pre.textContent;
-
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(texto).then(() => mostrarFeedbackCopiado(btn));
-    } else {
-        const textarea = document.createElement('textarea');
-        textarea.value = texto;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            mostrarFeedbackCopiado(btn);
-        } catch (err) {}
-        textarea.remove();
-    }
+function copiarFormulaTexto(elementId, boton) {
+    const texto = document.getElementById(elementId).textContent;
+    navigator.clipboard.writeText(texto).then(() => {
+        const original = boton.innerHTML;
+        boton.innerHTML = '<span>✓ Copiado!</span>';
+        setTimeout(() => {
+            boton.innerHTML = original;
+        }, 1500);
+    });
 }
 
-function mostrarFeedbackCopiado(btn) {
-    const origHtml = btn.innerHTML;
-    btn.innerHTML = '<span>✓ ¡Copiado!</span>';
-    btn.style.background = 'var(--success)';
-    setTimeout(() => {
-        btn.innerHTML = origHtml;
-        btn.style.background = '';
-    }, 2000);
-}
+function actualizarTodo() {
+    const resultado = mostrarTablaEscala();
+    const tablaContenido = document.getElementById('tabla-contenido');
+    const tablaError = document.getElementById('tabla-error');
+    const tablaMeta = document.getElementById('tabla-meta');
 
-// Listeners de controles de Excel
-document.getElementById('excel-celda').addEventListener('input', function() {
-    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    actualizarFormulasExcel();
-});
-
-// ─── WHATSAPP: COMPARTIR Y CONTADOR REAL ────────────────────
-const SHARE_KEY = 'calif_compartidos';
-const VISITAS_API_URL = 'https://api-visitas-ei0d.onrender.com';
-
-function getLocalShareCount() {
-    return parseInt(localStorage.getItem(SHARE_KEY) || '0', 10);
-}
-
-function setShareCountDisplay(n) {
-    const el = document.getElementById('share-count');
-    if (el) el.textContent = n;
-}
-
-let shareCountActual = getLocalShareCount();
-setShareCountDisplay(shareCountActual);
-
-async function sincronizarContadorWhatsAppReal() {
-    try {
-        const ctrl = new AbortController();
-        const timeout = setTimeout(() => ctrl.abort(), 4000);
-
-        let resp = await fetch(`${VISITAS_API_URL}/api/stats/shares?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
-        let data = resp && resp.ok ? await resp.json() : null;
-
-        if (!data || !data.total) {
-            resp = await fetch(`${VISITAS_API_URL}/api/stats/shares?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
-            data = resp && resp.ok ? await resp.json() : null;
-        }
-        clearTimeout(timeout);
-
-        if (data) {
-            const remoteTotal = (data.by_platform && data.by_platform.whatsapp) ? data.by_platform.whatsapp : (data.total || 0);
-            shareCountActual = Math.max(remoteTotal, getLocalShareCount());
-            localStorage.setItem(SHARE_KEY, String(shareCountActual));
-            setShareCountDisplay(shareCountActual);
-        }
-    } catch (e) {
-        // En caso de corte de red, se mantiene el valor local
-    }
-}
-
-document.getElementById('btn-whatsapp').addEventListener('click', function () {
-    const texto = encodeURIComponent(
-        '📊 Escala de Calificaciones\n\n' +
-        'Generá tus escalas de calificaciones y calculá notas fácilmente con la escala oficial de Paraguay.\n\n' +
-        '🔗 ' + window.location.href
-    );
-    const waUrl = `https://wa.me/?text=${texto}`;
-
-    // Incrementar en UI y almacenamiento local
-    shareCountActual++;
-    localStorage.setItem(SHARE_KEY, String(shareCountActual));
-    setShareCountDisplay(shareCountActual);
-
-    // Registrar en segundo plano en la API de analíticas
-    try {
-        fetch(`${VISITAS_API_URL}/track/share?project=Calificaciones.py&platform=whatsapp`, { mode: 'no-cors' }).catch(() => {});
-        fetch(`${VISITAS_API_URL}/track/share?project=calificaciones-py&platform=whatsapp`, { mode: 'no-cors' }).catch(() => {});
-    } catch (e) {}
-
-    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) {
-        window.location.href = waUrl;
-    } else {
-        window.open(waUrl, '_blank', 'width=700,height=600');
-    }
-});
-
-// ─── PESTAÑA MAPA DE UBICACIÓN (LEAFLET + OSM) ──────────────
-let leafletMap = null;
-let leafletMarkersLayer = null;
-let mapaInicializado = false;
-
-function inicializarMapaUsuarios() {
-    if (mapaInicializado) {
-        if (leafletMap) {
-            setTimeout(() => { leafletMap.invalidateSize(); }, 200);
-        }
+    if (resultado.error) {
+        tablaContenido.innerHTML = '';
+        tablaError.textContent = resultado.error;
+        tablaError.style.display = 'block';
+        tablaMeta.innerHTML = '';
         return;
     }
 
-    const container = document.getElementById('mapa-leaflet');
-    if (!container || typeof L === 'undefined') return;
+    tablaError.style.display = 'none';
+    tablaContenido.innerHTML = resultado.html;
+    tablaMeta.innerHTML = resultado.meta;
 
-    try {
-        // Centrar mapa por defecto en Paraguay
-        leafletMap = L.map('mapa-leaflet', {
-            center: [-23.4425, -58.4438],
-            zoom: 5,
-            minZoom: 2,
-            maxZoom: 18,
-            scrollWheelZoom: false
-        });
+    // ACTUALIZAR EL TOTAL Y ETIQUETA EN LA PestaÑA EXCEL
+    document.getElementById('excel-total-badge').textContent = document.getElementById('total-puntos').value;
+    document.getElementById('calc-total-label').textContent = document.getElementById('total-puntos').value;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
-            maxZoom: 19
-        }).addTo(leafletMap);
-
-        leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
-        mapaInicializado = true;
-
-        cargarDatosUbicacionMapa();
-
-        setTimeout(() => {
-            if (leafletMap) leafletMap.invalidateSize();
-        }, 250);
-    } catch (err) {
-        console.error('Error al inicializar mapa:', err);
-        const loadingEl = document.getElementById('mapa-loading');
-        if (loadingEl) {
-            loadingEl.innerHTML = '<span style="color:#ef4444;">⚠️ No se pudo inicializar el mapa en este momento.</span>';
-        }
-    }
+    // ACTUALIZAR FÓRMULAS DE EXCEL
+    actualizarExcelFormula();
 }
 
-async function cargarDatosUbicacionMapa() {
-    const loadingEl = document.getElementById('mapa-loading');
-    const loadingText = document.getElementById('mapa-loading-text');
-    if (loadingEl) loadingEl.style.opacity = '1';
-    if (loadingText) loadingText.textContent = 'Consultando registros geográficos...';
+function calcularAlumno() {
+    const N = parseInt(document.getElementById('total-puntos').value) || 30;
+    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
+    const puntaje = parseFloat(document.getElementById('calc-puntaje').value) || 0;
 
-    let data = null;
-    try {
-        const ctrl = new AbortController();
-        const timeout = setTimeout(() => ctrl.abort(), 5000);
+    const { ranges } = calcularEscala(N, exigencia);
 
-        let resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
-        data = resp && resp.ok ? await resp.json() : null;
+    let calificacion = '—';
+    let descriptor = '—';
 
-        if (!data || !data.cities || !data.cities.length) {
-            resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
-            data = resp && resp.ok ? await resp.json() : null;
-        }
-        clearTimeout(timeout);
-    } catch (e) {}
-
-    // Datos por defecto representativos de Paraguay si la API es nueva o no tiene historial
-    const defaultCities = [
-        { city: 'Asunción', country: 'Paraguay', region: 'Capital', lat: -25.2637, lon: -57.5759, count: 1 }
-    ];
-
-    const cities = (data && data.cities && data.cities.length) ? data.cities : defaultCities;
-    const countries = (data && data.countries && data.countries.length) ? data.countries : [{ country: 'Paraguay', count: 1 }];
-
-    renderizarPuntosEnMapa(cities, countries);
-
-    if (loadingEl) {
-        loadingEl.style.opacity = '0';
-        setTimeout(() => { loadingEl.style.display = 'none'; }, 300);
+    if (puntaje <= ranges[1][1]) {
+        calificacion = '1';
+        descriptor = 'Insuficiente';
+    } else if (puntaje <= ranges[2][1]) {
+        calificacion = '2';
+        descriptor = 'Aceptable';
+    } else if (puntaje <= ranges[3][1]) {
+        calificacion = '3';
+        descriptor = 'Bueno';
+    } else if (puntaje <= ranges[4][1]) {
+        calificacion = '4';
+        descriptor = 'Muy bueno';
+    } else if (puntaje <= ranges[5][1]) {
+        calificacion = '5';
+        descriptor = 'Excelente';
     }
+
+    const html = `
+        <span class="nota">${calificacion}</span>
+        <span class="desc">${descriptor}</span>
+    `;
+
+    document.getElementById('resultado-calcular').innerHTML = html;
 }
 
-function renderizarPuntosEnMapa(cities, countries) {
-    if (!leafletMap || !leafletMarkersLayer) return;
+// EVENT LISTENERS
 
-    leafletMarkersLayer.clearLayers();
-    const bounds = [];
-    let totalVisitasGeo = 0;
+// GENERADOR DE ESCALA - EVENTOS
 
-    cities.forEach(city => {
-        if (!city.lat || !city.lon) return;
-        const lat = parseFloat(city.lat);
-        const lon = parseFloat(city.lon);
-        if (isNaN(lat) || isNaN(lon)) return;
+document.getElementById('total-puntos').addEventListener('change', actualizarTodo);
+document.getElementById('exigencia-valor').addEventListener('change', manejarCambioExigenciaPersonalizada);
 
-        totalVisitasGeo += (city.count || 1);
-        const size = Math.min(26, Math.max(9, Math.sqrt(city.count || 1) * 6));
-        const markerColor = (city.count > 10) ? '#ef4444' : (city.count > 3 ? '#f59e0b' : '#38bdf8');
-
-        const marker = L.circleMarker([lat, lon], {
-            radius: size,
-            fillColor: markerColor,
-            color: '#ffffff',
-            weight: 2,
-            opacity: 0.9,
-            fillOpacity: 0.65
-        });
-
-        const ubicacionTexto = `${city.city}${city.region ? ', ' + city.region : ''} (${city.country})`;
-        marker.bindTooltip(`<strong>${ubicacionTexto}</strong><br>${city.count} consulta${city.count !== 1 ? 's' : ''}`, { direction: 'top' });
-        marker.bindPopup(`
-            <div style="font-family:'Inter',sans-serif;font-size:12px;color:#1e293b;padding:2px;">
-                <strong style="font-size:14px;color:#0f172a;">${city.city}</strong><br>
-                <span>${city.region ? city.region + ', ' : ''}${city.country}</span><br>
-                <div style="margin-top:4px;padding:3px 6px;background:#e2e8f0;border-radius:4px;font-weight:700;display:inline-block;">
-                    ${city.count} consulta${city.count !== 1 ? 's' : ''}
-                </div>
-            </div>
-        `);
-
-        leafletMarkersLayer.addLayer(marker);
-        bounds.push([lat, lon]);
+document.querySelectorAll('.exigencia-opts .btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const valor = btn.dataset.v;
+        if (valor === 'custom') {
+            activarExigenciaPersonalizada();
+        } else {
+            actualizarExigencia(btn, valor);
+        }
     });
+});
 
-    // Actualizar badges numéricos
-    document.getElementById('mapa-total-ciudades').textContent = cities.length;
-    document.getElementById('mapa-total-paises').textContent = countries.length;
-    document.getElementById('mapa-total-visitas-geo').textContent = totalVisitasGeo;
+// CALCULADORA - EVENTOS
+document.getElementById('btn-calcular').addEventListener('click', calcularAlumno);
 
-    // Actualizar lista de ciudades destacadas
-    const listEl = document.getElementById('mapa-top-ciudades-list');
-    if (listEl) {
-        listEl.innerHTML = cities.slice(0, 10).map(c => `
-            <span style="background:var(--input-bg);border:1px solid var(--card-border);padding:4px 10px;border-radius:14px;color:var(--text);display:inline-flex;align-items:center;gap:4px;">
-                📍 ${c.city}: <strong style="color:var(--accent);">${c.count}</strong>
-            </span>
-        `).join('');
-    }
+document.getElementById('calc-puntaje').addEventListener('change', calcularAlumno);
 
-    if (bounds.length > 0 && leafletMap) {
-        try {
-            leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 });
-        } catch (e) {}
-    }
-}
+document.getElementById('calc-puntaje').addEventListener('input', calcularAlumno);
 
-function recargarMapaUsuarios() {
-    const btn = document.getElementById('btn-recargar-mapa');
-    if (btn) btn.innerHTML = '⏳ Actualizando...';
-    const loadingEl = document.getElementById('mapa-loading');
-    if (loadingEl) {
-        loadingEl.style.display = 'flex';
-        loadingEl.style.opacity = '1';
-    }
-    cargarDatosUbicacionMapa().finally(() => {
-        if (btn) btn.innerHTML = '🔄 Actualizar mapa';
-        if (leafletMap) leafletMap.invalidateSize();
+// EXCEL - EVENTOS
+document.getElementById('excel-celda').addEventListener('change', function() {
+    this.value = this.value.toUpperCase();
+    actualizarExcelFormula();
+});
+
+// MANEJO DEL BOTON DE COMPARTIR EN WHATSAPP
+document.getElementById('btn-whatsapp').addEventListener('click', function() {
+    const url = 'https://api-visitas-ei0d.onrender.com/track/share?project=Calificaciones.py&platform=whatsapp';
+    const texto = 'Hola, comparte esta herramienta gratuita para calcular escalas de calificaciones: https://calificaciones-py.vercel.app/';
+
+    const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+    window.open(urlWhatsApp, '_blank');
+
+    // INCREMENTAR EL CONTADOR EN EL SERVIDOR (opcional)
+    fetch(url, { method: 'POST', mode: 'no-cors' }).catch(() => {});
+});
+
+// BOTON DE ICONO DEL MAPA (TOGGLING)
+document.getElementById('btn-mapa-icon').addEventListener('click', function() {
+    const btn = document.getElementById('tab-btn-mapa');
+    btn.click();
+});
+
+// CONTRASTE (MODO DIA/NOCHE)
+document.getElementById('btn-contraste').addEventListener('click', function() {
+    document.body.classList.toggle('high-contrast');
+});
+
+// INICIALIZACION
+actualizarTodo();
+
+// MARCAR LOS CONTADORES DE WHATSAPP AL CARGAR LA PAGINA (DESDE LA API DE ESTADISTICAS)
+fetch('https://api-visitas-ei0d.onrender.com/api/stats/overview?project=Calificaciones.py')
+    .then(res => res.json())
+    .then(data => {
+        const total = data.total_visitas || 0;
+        document.getElementById('share-count').textContent = total;
+        document.getElementById('contador-visitas-num').textContent = total;
+    })
+    .catch(() => {
+        // SI LA API FALLA, USAR EL LOCALSTORAGE (MANTENER LA DURA DEBE SER EN EL BACKEND, PERO PARA LA DEMO LO MANTENEMOS EN LOCALSTORAGE)
+        let stored = localStorage.getItem('calificaciones-visitas');
+        let count = stored ? parseInt(stored) : 0;
+        count++;
+        localStorage.setItem('calificaciones-visitas', count.toString());
+        document.getElementById('share-count').textContent = count;
+        document.getElementById('contador-visitas-num').textContent = count;
     });
-}
-
-// ─── CONTADOR DE VISITAS DIMINUTO EN PIE ─────────────────────
-// "un contador de visitas, no importa si es el mismo IP"
-const VISITAS_LOCAL_KEY = 'calif_total_vistas';
-
-function actualizarVisitasFooter(num) {
-    const el = document.getElementById('contador-visitas-num');
-    if (el) {
-        el.textContent = Number(num).toLocaleString('es-PY');
-    }
-}
-
-async function registrarYObtenerVisitas() {
-    // 1. Conteo acumulativo local sin importar IP (cada recarga o visita cuenta)
-    let localHits = parseInt(localStorage.getItem(VISITAS_LOCAL_KEY) || '0', 10) + 1;
-    localStorage.setItem(VISITAS_LOCAL_KEY, String(localHits));
-    actualizarVisitasFooter(localHits);
-
-    // 2. Notificar al backend de visitas (fire-and-forget)
-    try {
-        const path = encodeURIComponent(window.location.pathname || '/');
-        fetch(`${VISITAS_API_URL}/track?project=Calificaciones.py&page=${path}`, { mode: 'no-cors' }).catch(() => {});
-        fetch(`${VISITAS_API_URL}/track?project=calificaciones-py&page=${path}`, { mode: 'no-cors' }).catch(() => {});
-    } catch (e) {}
-
-    // 3. Consultar estadísticas globales registradas en el backend
-    try {
-        const ctrl = new AbortController();
-        const timeout = setTimeout(() => ctrl.abort(), 4000);
-
-        let resp = await fetch(`${VISITAS_API_URL}/api/stats/overview?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
-        let data = resp && resp.ok ? await resp.json() : null;
-
-        if (!data || !data.total) {
-            resp = await fetch(`${VISITAS_API_URL}/api/stats/overview?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
-            data = resp && resp.ok ? await resp.json() : null;
-        }
-        clearTimeout(timeout);
-
-        if (data && typeof data.total === 'number') {
-            const consolidado = Math.max(data.total, localHits);
-            localStorage.setItem(VISITAS_LOCAL_KEY, String(consolidado));
-            actualizarVisitasFooter(consolidado);
-        }
-    } catch (e) {}
-}
-
-// ─── INICIALIZACIÓN GENERAL ──────────────────────────────────
-actualizarTotalLabel();
-generarTabla();
-sincronizarContadorWhatsAppReal();
-registrarYObtenerVisitas();
 </script>
 </body>
 </html>
