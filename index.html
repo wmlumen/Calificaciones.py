@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -7,6 +7,9 @@
     <!-- Tracking API-Visitas: permanencia + visitas -->
     <script src="https://api-visitas-ei0d.onrender.com/tracker.js?project=Calificaciones.py" async></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS & JS para Mapa de Ubicación -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 :root {
     --bg: #0f172a;
@@ -19,6 +22,7 @@
     --accent-soft: rgba(59,130,246,.15);
     --success: #22c55e;
     --danger: #ef4444;
+    --warning: #f59e0b;
     --input-bg: #0f172a;
     --input-border: #334155;
     --table-border: #334155;
@@ -40,6 +44,7 @@
     --accent-soft: rgba(255,215,0,.25);
     --success: #0f0;
     --danger: #f00;
+    --warning: #ffb703;
     --input-bg: #000;
     --input-border: #555;
     --table-border: #555;
@@ -61,25 +66,27 @@ body {
     align-items: center;
 }
 .container {
-    max-width: 820px;
+    max-width: 840px;
     width: 100%;
 }
 .card {
     background: var(--card);
     border: 1px solid var(--card-border);
     border-radius: var(--radius-lg);
-    padding: 32px 28px;
-    margin-bottom: 24px;
+    padding: 30px 26px;
+    margin-bottom: 22px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.15);
 }
 .card-title {
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 700;
     margin: 0 0 4px;
 }
 .card-sub {
     color: var(--muted);
     font-size: 13px;
-    margin: 0 0 20px;
+    margin: 0 0 18px;
+    line-height: 1.5;
 }
 .top-bar {
     display: flex;
@@ -87,7 +94,7 @@ body {
     justify-content: space-between;
     gap: 12px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 .top-bar h1 {
     font-size: 28px;
@@ -146,6 +153,63 @@ body {
     background: var(--accent);
     color: #fff;
 }
+
+/* ─── Pestañas (Tabs) ─────────────────────────────────── */
+.tab-nav {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    background: var(--card);
+    padding: 6px;
+    border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+    flex-wrap: wrap;
+}
+.tab-link {
+    flex: 1 1 auto;
+    min-width: 140px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all .2s ease;
+}
+.tab-link:hover {
+    color: var(--text);
+    background: rgba(255,255,255,.05);
+}
+.tab-link.active {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(59,130,246,.25);
+}
+.high-contrast .tab-link.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+}
+.tab-pane {
+    display: none;
+}
+.tab-pane.active {
+    display: block;
+    animation: fadeIn .2s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Controles y Formularios ─────────────────────────── */
 .form-group { margin-bottom: 18px; }
 .form-group label {
     display: block;
@@ -159,25 +223,31 @@ body {
     color: var(--muted);
     margin-top: 4px;
 }
-input[type="number"] {
+input[type="number"],
+input[type="text"],
+select {
     width: 100%;
     padding: 10px 14px;
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: 8px;
     color: var(--text);
-    font-size: 15px;
+    font-size: 14px;
     font-family: inherit;
     outline: none;
     transition: .2s;
 }
-input[type="number"]:focus { border-color: var(--accent); }
+input[type="number"]:focus,
+input[type="text"]:focus,
+select:focus { border-color: var(--accent); }
 input:disabled { opacity: .5; }
 .exigencia-opts {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
+
+/* ─── Tablas y Badges ─────────────────────────────────── */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -228,68 +298,121 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
     font-weight: 500;
     color: var(--muted);
 }
+
+/* ─── Excel Tab Styles ────────────────────────────────── */
+.formula-box {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+.formula-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.formula-code {
+    margin: 0;
+    padding: 12px 14px;
+    background: rgba(0,0,0,.35);
+    border-radius: 8px;
+    font-family: Consolas, Monaco, 'Courier New', monospace;
+    font-size: 13px;
+    color: #38bdf8;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    border: 1px solid rgba(255,255,255,.05);
+    line-height: 1.5;
+}
+.high-contrast .formula-code {
+    background: #000;
+    color: #ffd700;
+    border-color: #555;
+}
+
+/* ─── Mapa Leaflet ────────────────────────────────────── */
+.leaflet-container {
+    font-family: 'Inter', sans-serif !important;
+}
+
+/* ─── Contador de Visitas Diminuto ────────────────────── */
+.visitas-diminuto {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, .04);
+    border: 1px solid var(--card-border);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 14px;
+    cursor: default;
+    transition: all .2s ease;
+}
+.visitas-diminuto:hover {
+    background: rgba(255, 255, 255, .08);
+    color: var(--text);
+}
+.visitas-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+    display: inline-block;
+    box-shadow: 0 0 6px #22c55e;
+}
+.visitas-num {
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* ─── Responsive & Print ──────────────────────────────── */
 @media print {
     body { background: #fff !important; color: #000 !important; }
     .card { background: #fff !important; border: 1px solid #ccc !important; }
-    .top-actions .btn { display: none; }
-    #btn-contraste { display: none; }
+    .top-actions .btn,
+    .top-actions .btn-whatsapp,
+    #btn-contraste,
+    .tab-nav,
+    #tab-excel,
+    #tab-mapa,
+    .visitas-diminuto,
+    #modal-contacto { display: none !important; }
+    #tab-escala { display: block !important; }
 }
 @media (max-width: 600px) {
     body { padding: 12px 8px; }
-    .container { text-align: center; }
-    .card { padding: 16px 12px; margin-bottom: 16px; }
-    .card-title { font-size: 18px; text-align: center; }
-    .card-sub { font-size: 12px; text-align: center; }
+    .card { padding: 18px 14px; margin-bottom: 16px; }
+    .card-title { font-size: 18px; }
+    .card-sub { font-size: 12px; }
     .top-bar { flex-direction: column; align-items: center; gap: 8px; }
     .top-bar h1 { font-size: 20px; text-align: center; }
     .top-actions { justify-content: center; }
     .top-actions .btn,
     .top-actions .btn-whatsapp { padding: 10px 14px; font-size: 14px; min-height: 44px; }
-    input[type="number"] { font-size: 16px; padding: 12px 14px; min-height: 44px; }
-    /* Centrar inputs y controles */
-    .card > div:nth-child(3) { justify-content: center; }
-    .card > div:nth-child(3) > div { text-align: center; }
-    .card > div:nth-child(3) > div label { text-align: center; }
+    .tab-link { min-width: 100px; padding: 8px 10px; font-size: 12px; }
+    input[type="number"],
+    input[type="text"],
+    select { font-size: 16px; padding: 12px 14px; min-height: 44px; }
     #exigencia-opts { justify-content: center; }
     #exigencia-opts .btn { padding: 10px 12px; font-size: 14px; min-height: 44px; }
     #exigencia-valor { width: 80px; padding: 10px 8px; font-size: 16px; min-height: 44px; }
-    #btn-generar { padding: 12px; font-size: 16px; min-height: 48px; }
-    /* Centrar calculadora */
-    #btn-calcular { padding: 12px 20px; font-size: 16px; min-height: 44px; }
-    #calc-puntaje { font-size: 16px; padding: 12px 14px; min-height: 44px; }
-    .result-box { font-size: 16px; padding: 14px; min-height: 48px; justify-content: center; }
-    .result-box .nota { font-size: 26px; }
-    .form-group label { font-size: 14px; }
-    .form-group .help { font-size: 12px; }
-    #tabla-contenido { margin: 0 -8px; }
-    #tabla-contenido table { font-size: 13px; min-width: 320px; }
-    #tabla-contenido th,
-    #tabla-contenido td { padding: 8px 10px; }
+    #btn-generar, #btn-calcular { min-height: 44px; font-size: 15px; }
     #tabla-meta { font-size: 11px; flex-direction: column; align-items: stretch; gap: 8px; }
     #tabla-meta button { width: 100%; padding: 10px; min-height: 44px; }
     #modal-contacto > div { padding: 20px; margin: 10px; max-width: 100%; border-radius: 16px; }
-    #modal-contacto input,
-    #modal-contacto textarea { font-size: 16px; padding: 12px 14px; min-height: 44px; }
-    #modal-contacto button[type="submit"] { padding: 14px; font-size: 16px; min-height: 48px; }
-    .footer, .container > div:last-child { font-size: 12px; padding: 16px 8px; line-height: 1.5; }
-
-    /* WhatsApp button mobile */
-    .btn-whatsapp svg { width: 20px; height: 20px; }
-    .share-counter .num { font-size: 14px; }
-
-    /* Fix modal close button touch */
-    #modal-contacto button[onclick*="cerrar"] { width: 44px; height: 44px; font-size: 28px; }
-}
-
-@media (min-width: 601px) and (max-width: 900px) {
-    .card { padding: 24px 20px; }
-    .top-bar h1 { font-size: 24px; }
-    input[type="number"] { font-size: 15px; }
 }
 </style>
 </head>
 <body>
 <div class="container">
+    <!-- BARRA SUPERIOR -->
     <div class="top-bar">
         <h1>Escala de Calificaciones</h1>
         <div class="top-actions">
@@ -306,68 +429,243 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         </div>
     </div>
 
-    <!-- GENERADOR -->
-    <div class="card" style="padding:24px 24px 20px;">
-        <div class="card-title" style="margin-bottom:4px;">Parámetros principales</div>
-        <div class="card-sub" style="margin-bottom:12px;">Criterios generales de promoción · Nivel de exigencia: <strong id="exigencia-label">70%</strong></div>
+    <!-- NAVEGACIÓN DE PESTAÑAS (TABS) -->
+    <nav class="tab-nav" role="tablist" aria-label="Secciones de la aplicación">
+        <button class="tab-link active" data-tab="tab-escala" role="tab" aria-selected="true" id="tab-btn-escala">
+            <span>📊</span> Escala & Calculadora
+        </button>
+        <button class="tab-link" data-tab="tab-excel" role="tab" aria-selected="false" id="tab-btn-excel">
+            <span>📗</span> Excel
+        </button>
+        <button class="tab-link" data-tab="tab-mapa" role="tab" aria-selected="false" id="tab-btn-mapa">
+            <span>🗺️</span> Mapa de Ubicación
+        </button>
+    </nav>
 
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="flex:1;min-width:130px;">
-                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
-                <input type="number" id="total-puntos" value="30" min="1" max="1000" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
-                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 30 pts).</div>
-            </div>
-            <div style="flex:2;min-width:200px;">
-                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
-                <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
-                    <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
-                    <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
-                    <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
-                    <button class="btn" data-v="80" style="padding:5px 12px;font-size:12px;">80%</button>
-                    <button class="btn" data-v="custom" style="padding:5px 12px;font-size:12px;">Personalizado</button>
-                    <input type="number" id="exigencia-valor" value="70" min="1" max="99" disabled style="width:65px;padding:5px 8px;font-size:13px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;">
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PESTAÑA 1: ESCALA & CALCULADORA                     -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="tab-escala" class="tab-pane active" role="tabpanel" aria-labelledby="tab-btn-escala">
+        <!-- GENERADOR DE ESCALA -->
+        <div class="card" style="padding:24px 24px 20px;">
+            <div class="card-title" style="margin-bottom:4px;">Parámetros principales</div>
+            <div class="card-sub" style="margin-bottom:12px;">Criterios generales de promoción · Nivel de exigencia: <strong id="exigencia-label">70%</strong></div>
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;">
+                <div style="flex:1;min-width:130px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
+                    <input type="number" id="total-puntos" value="30" min="1" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 30 pts).</div>
                 </div>
-                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Preset 50–80% o ingresa valor manual en Personalizado.</div>
+                <div style="flex:2;min-width:200px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
+                        <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
+                        <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
+                        <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
+                        <button class="btn" data-v="80" style="padding:5px 12px;font-size:12px;">80%</button>
+                        <button class="btn" data-v="custom" style="padding:5px 12px;font-size:12px;">Personalizado</button>
+                        <input type="number" id="exigencia-valor" value="70" min="1" max="99" disabled style="width:65px;padding:5px 8px;font-size:13px;background:var(--input-bg);border:1px solid var(--input-border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;">
+                    </div>
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Preset 50–80% o ingresa valor manual en Personalizado.</div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
+
+            <div id="tabla-wrapper" style="margin-top:16px;">
+                <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
+                <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
+                <div id="tabla-contenido" style="overflow-x:auto;"></div>
+                <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
             </div>
         </div>
 
-        <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
+        <!-- CALCULADORA PARA EL ALUMNO -->
+        <div class="card">
+            <div class="card-title" style="margin-bottom:4px;">Calculadora para el alumno</div>
+            <div class="card-sub" style="margin-bottom:12px;">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
 
-        <div id="tabla-wrapper" style="margin-top:16px;">
-            <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
-            <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
-            <div id="tabla-contenido" style="overflow-x:auto;"></div>
-            <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:120px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Puntaje alcanzado (A)</label>
+                    <input type="number" id="calc-puntaje" value="" min="0" placeholder="Ingrese el puntaje" style="padding:8px 12px;font-size:14px;">
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total de puntos (N): <strong id="calc-total-label">30</strong> (mismo de arriba)</div>
+                </div>
+                <div style="display:flex;align-items:flex-end;">
+                    <button class="btn btn-primary" id="btn-calcular" style="padding:8px 20px;font-size:14px;height:38px;">Calcular</button>
+                </div>
+            </div>
+
+            <div class="result-box" id="resultado-calcular" style="margin-top:12px;padding:12px 16px;min-height:44px;font-size:15px;">
+                <span style="color:var(--muted);font-weight:400;font-size:13px;">Calificación: —</span>
+            </div>
+            <div class="help" style="text-align:center;font-size:11px;margin-top:6px;">Ingresa el puntaje del alumno para ver el resultado.</div>
         </div>
     </div>
 
-    <!-- CALCULADORA -->
-    <div class="card">
-        <div class="card-title" style="margin-bottom:4px;">Calculadora para el alumno</div>
-        <div class="card-sub" style="margin-bottom:12px;">Usa el mismo nivel de exigencia (50, 60, 70, 80% o personalizado).</div>
-
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:120px;">
-                <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Puntaje alcanzado (A)</label>
-                <input type="number" id="calc-puntaje" value="" min="0" max="1000" placeholder="Ingrese el puntaje" style="padding:8px 12px;font-size:14px;">
-                <div style="font-size:11px;color:var(--muted);margin-top:3px;">Total de puntos (N): <strong id="calc-total-label">30</strong> (mismo de arriba)</div>
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PESTAÑA 2: FÓRMULAS EXCEL                           -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="tab-excel" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-excel">
+        <div class="card">
+            <div class="card-title">Fórmulas para Microsoft Excel & Google Sheets</div>
+            <div class="card-sub">
+                Generadas en tiempo real de acuerdo a la escala activa: <strong>Total <span id="excel-total-badge">30</span> pts</strong> y <strong>Exigencia <span id="excel-exigencia-badge">70%</span></strong>.
             </div>
-            <div style="display:flex;align-items:flex-end;">
-                <button class="btn btn-primary" id="btn-calcular" style="padding:8px 20px;font-size:14px;height:38px;">Calcular</button>
+
+            <!-- Panel de Configuración de la Celda -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;margin-bottom:20px;background:var(--input-bg);padding:14px;border-radius:var(--radius);border:1px solid var(--card-border);">
+                <div style="flex:1;min-width:140px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">
+                        Celda con el puntaje del alumno
+                    </label>
+                    <input type="text" id="excel-celda" value="A2" maxlength="6" placeholder="ej.: A2" style="padding:8px 12px;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;width:100%;">
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Indica la primera celda con puntaje (ej.: A2, B2).</div>
+                </div>
+
+                <div style="flex:1;min-width:140px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">
+                        Separador de argumentos
+                    </label>
+                    <select id="excel-separador" style="padding:8px 12px;font-size:13px;width:100%;background:var(--card);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+                        <option value=";" selected>Punto y coma ( ; ) – Estándar ES / Paraguay</option>
+                        <option value=",">Coma ( , ) – Estándar US / Internacional</option>
+                    </select>
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Excel en español de Paraguay utiliza punto y coma (;).</div>
+                </div>
+
+                <div style="flex:1;min-width:140px;">
+                    <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">
+                        Sintaxis de fórmula
+                    </label>
+                    <select id="excel-tipo-formula" style="padding:8px 12px;font-size:13px;width:100%;background:var(--card);border:1px solid var(--input-border);border-radius:8px;color:var(--text);font-family:inherit;outline:none;">
+                        <option value="siconjunto" selected>SI.CONJUNTO (Excel 2019 / 365 / Sheets)</option>
+                        <option value="sianidado">SI anidado (Excel 2007, 2010, 2013, 2016)</option>
+                        <option value="ifs">IFS (Excel en inglés)</option>
+                    </select>
+                    <div style="font-size:11px;color:var(--muted);margin-top:3px;">Elige según tu versión o idioma de Excel.</div>
+                </div>
+            </div>
+
+            <div style="margin-bottom:18px;display:flex;align-items:center;gap:8px;">
+                <input type="checkbox" id="excel-check-vacio" checked style="cursor:pointer;width:16px;height:16px;accent-color:var(--accent);">
+                <label for="excel-check-vacio" style="font-size:13px;cursor:pointer;color:var(--text);user-select:none;">
+                    Dejar celda en blanco si el alumno no tiene puntaje cargado <code>(=SI(celda=""; ""; ...))</code>
+                </label>
+            </div>
+
+            <!-- FÓRMULA 1: CALIFICACIÓN NUMÉRICA -->
+            <div class="formula-box">
+                <div class="formula-header">
+                    <div>
+                        <span class="badge" style="background:rgba(34,197,94,.15);color:#22c55e;">Nota Numérica</span>
+                        <strong style="margin-left:6px;font-size:14px;">Calificación del 1 al 5</strong>
+                    </div>
+                    <button class="btn btn-primary" id="btn-copiar-num" onclick="copiarFormulaTexto('excel-formula-num', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                        <span>📋 Copiar fórmula</span>
+                    </button>
+                </div>
+                <pre id="excel-formula-num" class="formula-code"></pre>
+            </div>
+
+            <!-- FÓRMULA 2: DESCRIPTOR CUALITATIVO -->
+            <div class="formula-box">
+                <div class="formula-header">
+                    <div>
+                        <span class="badge" style="background:rgba(168,85,247,.15);color:#a855f7;">Descriptor MEC</span>
+                        <strong style="margin-left:6px;font-size:14px;">Insuficiente, Aceptable, Bueno, Muy bueno, Excelente</strong>
+                    </div>
+                    <button class="btn btn-primary" id="btn-copiar-desc" onclick="copiarFormulaTexto('excel-formula-desc', this)" style="padding:6px 14px;font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                        <span>📋 Copiar fórmula</span>
+                    </button>
+                </div>
+                <pre id="excel-formula-desc" class="formula-code"></pre>
+            </div>
+
+            <!-- VISTA PREVIA INTERACTIVA EN PLANILLA -->
+            <div style="margin-top:22px;">
+                <div class="card-title" style="font-size:16px;margin-bottom:4px;">Simulación en vivo de tu planilla</div>
+                <div class="card-sub" style="margin-bottom:12px;">Así evaluará Excel los puntajes según la celda <strong id="preview-celda-label">A2</strong>:</div>
+
+                <div id="excel-preview-wrapper" style="overflow-x:auto;"></div>
+
+                <div style="margin-top:14px;padding:14px 18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);font-size:12px;line-height:1.6;color:var(--text);">
+                    <strong style="color:var(--accent);">💡 ¿Cómo aplicarla paso a paso en Excel?</strong><br>
+                    1. Presioná <strong>Copiar fórmula</strong> en la opción deseada (numérica o descriptor).<br>
+                    2. En tu archivo Excel, hacé clic en la celda donde va la calificación (por ejemplo <code>B2</code> si el puntaje está en <code>A2</code>).<br>
+                    3. Pegá la fórmula presionando <code>Ctrl + V</code> y tocá <code>Enter</code>.<br>
+                    4. Hacé doble clic en la esquina inferior derecha de la celda <code>B2</code> para extender la fórmula a todos los alumnos de la lista.
+                </div>
             </div>
         </div>
-
-        <div class="result-box" id="resultado-calcular" style="margin-top:12px;padding:12px 16px;min-height:44px;font-size:15px;">
-            <span style="color:var(--muted);font-weight:400;font-size:13px;">Calificación: —</span>
-        </div>
-        <div class="help" style="text-align:center;font-size:11px;margin-top:6px;">Ingresa el puntaje del alumno para ver el resultado.</div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PESTAÑA 3: MAPA DE UBICACIÓN                        -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="tab-mapa" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-mapa">
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+                <div>
+                    <div class="card-title" style="margin-bottom:4px;">Mapa de Ubicación de Usuarios</div>
+                    <div class="card-sub" style="margin-bottom:0;">
+                        Visualización en tiempo real de los accesos y consultas a la aplicación.
+                    </div>
+                </div>
+                <button class="btn" onclick="recargarMapaUsuarios()" id="btn-recargar-mapa" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                    🔄 Actualizar mapa
+                </button>
+            </div>
+
+            <!-- Contenedor del Mapa Leaflet -->
+            <div id="mapa-wrapper" style="position:relative;width:100%;height:380px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--card-border);background:var(--input-bg);">
+                <div id="mapa-leaflet" style="width:100%;height:100%;"></div>
+                <div id="mapa-loading" style="position:absolute;inset:0;background:rgba(15,23,42,.75);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;z-index:500;color:var(--text);font-size:13px;pointer-events:none;transition:opacity .3s ease;">
+                    <span style="font-size:24px;">📍</span>
+                    <span id="mapa-loading-text">Cargando ubicaciones de usuarios...</span>
+                </div>
+            </div>
+
+            <!-- Estadísticas Geográficas -->
+            <div id="mapa-stats" style="margin-top:16px;display:flex;gap:12px;flex-wrap:wrap;">
+                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
+                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Ciudades registradas</div>
+                    <div id="mapa-total-ciudades" style="font-size:22px;font-weight:800;color:var(--accent);margin-top:4px;">0</div>
+                </div>
+                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
+                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Países activos</div>
+                    <div id="mapa-total-paises" style="font-size:22px;font-weight:800;color:#22c55e;margin-top:4px;">0</div>
+                </div>
+                <div style="flex:1;min-width:130px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;text-align:center;">
+                    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:600;">Visitas geolocalizadas</div>
+                    <div id="mapa-total-visitas-geo" style="font-size:22px;font-weight:800;color:#f59e0b;margin-top:4px;">0</div>
+                </div>
+            </div>
+
+            <!-- Lista de Ciudades Principales -->
+            <div id="mapa-top-ciudades-wrapper" style="margin-top:16px;">
+                <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text);">Ciudades con mayor actividad:</div>
+                <div id="mapa-top-ciudades-list" style="display:flex;gap:8px;flex-wrap:wrap;font-size:12px;">
+                    <span style="color:var(--muted);font-size:12px;">Cargando registros...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DESCARGO LEGAL Y CONTACTO -->
     <div style="text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);line-height:1.7;">
         Este material <strong>NO está autorizado ni validado</strong> por el Ministerio de Educación y Ciencias (MEC) de Paraguay.<br>
         Se presenta únicamente como un ejercicio matemático y algorítmico, diseñado para apoyar al Docente, orientar al Padre y guiar al Alumno en la comprensión objetiva de las escalas de calificaciones.<br><br>
         Su propósito es acercar a la verdad de los puntajes y sus equivalencias, ofreciendo una herramienta práctica y transparente que facilita el análisis y la interpretación de los resultados académicos.<br><br>
         Contacto: <a href="#" onclick="abrirContacto();return false;" style="color:var(--accent);text-decoration:none;">wmlumen@gmail.com</a>
+        <br>
+        <!-- CONTADOR DE VISITAS DIMINUTO -->
+        <div class="visitas-diminuto" id="visitas-footer" title="Contador total de visitas a la aplicación">
+            <span class="visitas-dot"></span>
+            <span class="visitas-label">Visitas:</span>
+            <span class="visitas-num" id="contador-visitas-num">0</span>
+        </div>
     </div>
 </div>
 
@@ -406,14 +704,15 @@ function cerrarContacto() { document.getElementById('modal-contacto').style.disp
 document.getElementById('form-contacto').addEventListener('submit', function() {
     setTimeout(() => { cerrarContacto(); this.reset(); }, 1000);
 });
-// cerrar al hacer clic fuera
 document.getElementById('modal-contacto').addEventListener('click', function(e) { if (e.target === this) cerrarContacto(); });
 
 const descriptores = {1:'Insuficiente',2:'Aceptable',3:'Bueno',4:'Muy bueno',5:'Excelente'};
 
+// ─── CÁLCULO DE ESCALA (MEC PARAGUAY) ───────────────────────
 function calcularEscala(N, exigenciaPct) {
     const LS = N;
-    let LI = Math.ceil((exigenciaPct / 100) * N);
+    // Normativa MEC: redondeo simétrico/aritmético al entero más próximo (>= 0.5 sube, < 0.5 baja)
+    let LI = Math.round((exigenciaPct / 100) * N);
     if (LI < 1) LI = 1;
     if (LI > LS) LI = LS;
 
@@ -421,7 +720,7 @@ function calcularEscala(N, exigenciaPct) {
     const ranges = {};
 
     if (points <= 0) {
-        ranges[1] = [1, N];
+        ranges[1] = [0, N];
         ranges[2] = ranges[3] = ranges[4] = ranges[5] = null;
     } else {
         const base = Math.floor(points / 4);
@@ -446,7 +745,7 @@ function calcularEscala(N, exigenciaPct) {
         const seg4 = sizes[2] > 0 ? [start, start + sizes[2] - 1] : null;
         start = seg4 ? seg4[1] + 1 : start;
         const seg5 = sizes[3] > 0 ? [start, LS] : null;
-        const seg1 = [1, LI - 1];
+        const seg1 = [0, LI - 1];
 
         ranges[1] = seg1[0] <= seg1[1] ? seg1 : null;
         ranges[2] = seg2;
@@ -461,12 +760,12 @@ function calcularEscala(N, exigenciaPct) {
         escalas[i] = r && r[0] <= r[1] ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}-${r[1]}`) : null;
     }
 
-    return { total: N, exigencia: exigenciaPct, limite_inferior: LI, limite_superior: LS, escalas, descriptores };
+    return { total: N, exigencia: exigenciaPct, limite_inferior: LI, limite_superior: LS, escalas, descriptores, ranges };
 }
 
 function calcularCalificacion(N, scoreRaw, exigenciaPct) {
     const LS = N;
-    let LI = Math.ceil((exigenciaPct / 100) * N);
+    let LI = Math.round((exigenciaPct / 100) * N);
     if (LI < 1) LI = 1;
     if (LI > LS) LI = LS;
 
@@ -498,7 +797,7 @@ function calcularCalificacion(N, scoreRaw, exigenciaPct) {
         start = seg4 ? seg4[1] + 1 : start;
         const seg5 = sizes[3] > 0 ? [start, LS] : null;
 
-        const ranges = [[1, LI - 1], seg2, seg3, seg4, seg5];
+        const ranges = [[0, LI - 1], seg2, seg3, seg4, seg5];
         for (let i = 0; i < ranges.length; i++) {
             const range = ranges[i];
             if (range && scoreRaw >= range[0] && scoreRaw <= range[1]) { grade = i + 1; break; }
@@ -509,6 +808,7 @@ function calcularCalificacion(N, scoreRaw, exigenciaPct) {
 }
 
 let exigenciaActual = 70;
+let escalaDataActual = null;
 
 function selExigencia(v) {
     const btns = document.querySelectorAll('#exigencia-opts .btn');
@@ -549,29 +849,29 @@ document.getElementById('exigencia-valor').addEventListener('input', function() 
 });
 
 function autoGenerar() {
-    const t = valNum(document.getElementById('total-puntos').value, 1, 1000);
+    const t = valNum(document.getElementById('total-puntos').value, 1);
     const ex = getExigencia();
     if (t.ok && ex >= 1 && ex <= 99) generarTabla();
 }
 
-function valNum(v, min, max) {
+function valNum(v, min, max = Infinity) {
     const n = parseInt(v, 10);
     if (isNaN(n) || n < min) return {ok:false,msg:'Debe ser ≥ ' + min};
-    if (n > max) return {ok:false,msg:'Debe ser ≤ ' + max};
+    if (max !== undefined && max !== Infinity && n > max) return {ok:false,msg:'Debe ser ≤ ' + max};
     return {ok:true,val:n};
 }
 
 function generarTabla() {
     const totalEl = document.getElementById('total-puntos');
     const totalV = totalEl ? totalEl.value : '';
-    const t = valNum(totalV, 1, 1000);
+    const t = valNum(totalV, 1);
     if (!t.ok) return mostrarErrorTabla('Total de puntos: ' + t.msg);
 
     const ex = getExigencia();
     if (ex < 1 || ex > 99) return mostrarErrorTabla('Nivel de exigencia debe estar entre 1 y 99.');
 
-    const data = calcularEscala(t.val, ex);
-    const esc = data.escalas;
+    escalaDataActual = calcularEscala(t.val, ex);
+    const esc = escalaDataActual.escalas;
 
     let html = '<table><thead><tr><th>Calificación</th><th>Descriptor</th><th>Rango de puntos</th></tr></thead><tbody>';
     for (let i = 1; i <= 5; i++) {
@@ -580,15 +880,18 @@ function generarTabla() {
     html += '</tbody></table>';
 
     document.getElementById('tabla-meta').innerHTML = `
-        <span>Límite inferior: <strong>${data.limite_inferior}</strong> &nbsp;|&nbsp;
-        Límite superior: <strong>${data.limite_superior}</strong> &nbsp;|&nbsp;
-        Exigencia: <strong>${data.exigencia}%</strong> &nbsp;|&nbsp;
-        Total de puntos: <strong>${data.total}</strong></span>
+        <span>Límite inferior: <strong>${escalaDataActual.limite_inferior}</strong> &nbsp;|&nbsp;
+        Límite superior: <strong>${escalaDataActual.limite_superior}</strong> &nbsp;|&nbsp;
+        Exigencia: <strong>${escalaDataActual.exigencia}%</strong> &nbsp;|&nbsp;
+        Total de puntos: <strong>${escalaDataActual.total}</strong></span>
         <button class="btn" onclick="descargarTabla()" style="white-space:nowrap;">⬇ Descargar tabla</button>
     `;
 
     document.getElementById('tabla-error').style.display = 'none';
     document.getElementById('tabla-contenido').innerHTML = html;
+
+    // Actualizar fórmulas Excel sincrónicamente
+    actualizarFormulasExcel();
 }
 
 function mostrarErrorTabla(msg) {
@@ -613,7 +916,7 @@ function calcularNota() {
     const totalV = totalEl ? totalEl.value : '';
     const puntV = puntEl ? puntEl.value : '';
 
-    const t = valNum(totalV, 1, 1000);
+    const t = valNum(totalV, 1);
     if (!t.ok) return mostrarResultado('Total de puntos: ' + t.msg, false);
 
     if (puntV === '') return mostrarResultado('Ingresa el puntaje del alumno', false);
@@ -641,6 +944,7 @@ document.getElementById('btn-calcular').addEventListener('click', calcularNota);
 document.getElementById('calc-puntaje').addEventListener('keydown', e => { if (e.key === 'Enter') calcularNota(); });
 document.getElementById('total-puntos').addEventListener('keydown', e => { if (e.key === 'Enter') generarTabla(); });
 
+// Alto contraste
 let contrasteActivo = false;
 document.getElementById('btn-contraste').addEventListener('click', function() {
     contrasteActivo = !contrasteActivo;
@@ -650,6 +954,7 @@ document.getElementById('btn-contraste').addEventListener('click', function() {
     this.setAttribute('aria-label', this.title);
 });
 
+// Descargar tabla PNG
 async function descargarTabla() {
     if (typeof html2canvas === 'undefined') {
         const btn = document.querySelector('#tabla-meta button');
@@ -724,52 +1029,491 @@ async function descargarTabla() {
     }
 }
 
-// ─── WhatsApp Compartir ─────────────────────────────────
-const SHARE_KEY = 'calif_compartidos';
-const VISITAS_API = (document.querySelector('script[src*="/track?"]')?.src?.split('/track?')[0]) || 'https://api-visitas-ei0d.onrender.com';
+// ─── GESTIÓN DE PESTAÑAS (TABS) ─────────────────────────────
+function switchTab(targetTabId) {
+    document.querySelectorAll('.tab-link').forEach(btn => {
+        const isActive = btn.dataset.tab === targetTabId;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
 
-function getShareCount() {
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.toggle('active', pane.id === targetTabId);
+    });
+
+    if (targetTabId === 'tab-excel') {
+        actualizarFormulasExcel();
+    } else if (targetTabId === 'tab-mapa') {
+        inicializarMapaUsuarios();
+    }
+}
+
+document.querySelectorAll('.tab-link').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ─── PESTAÑA EXCEL: GENERADOR DE FÓRMULAS DINÁMICAS ─────────
+function sanitizarCelda(val) {
+    let limpia = (val || '').toUpperCase().trim();
+    // Validar formato de celda Excel (ej.: A2, B10, AA5)
+    if (!/^[A-Z]{1,3}[1-9][0-9]{0,6}$/.test(limpia)) {
+        limpia = 'A2';
+    }
+    return limpia;
+}
+
+function getLimitesSuperioresEscala(data) {
+    if (!data || !data.ranges) return null;
+    const U = {};
+    for (let i = 1; i <= 5; i++) {
+        const r = data.ranges[i];
+        if (r && r.length === 2 && r[1] !== null) {
+            U[i] = r[1];
+        } else {
+            U[i] = null;
+        }
+    }
+    // Si la nota 5 no tiene rango específico pero existe total N
+    if (U[5] === null && data.total) U[5] = data.total;
+    return U;
+}
+
+function actualizarFormulasExcel() {
+    if (!escalaDataActual) {
+        const total = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+        const exigencia = getExigencia();
+        escalaDataActual = calcularEscala(total, exigencia);
+    }
+
+    const data = escalaDataActual;
+    const total = data.total;
+    const exigencia = data.exigencia;
+
+    // Actualizar etiquetas en la pestaña Excel
+    const badgeTot = document.getElementById('excel-total-badge');
+    const badgeEx = document.getElementById('excel-exigencia-badge');
+    if (badgeTot) badgeTot.textContent = total;
+    if (badgeEx) badgeEx.textContent = exigencia + '%';
+
+    const celdaInput = document.getElementById('excel-celda');
+    let celda = sanitizarCelda(celdaInput ? celdaInput.value : 'A2');
+    const sep = document.getElementById('excel-separador').value;
+    const tipo = document.getElementById('excel-tipo-formula').value;
+    const protegerVacio = document.getElementById('excel-check-vacio').checked;
+
+    const labelPreview = document.getElementById('preview-celda-label');
+    if (labelPreview) labelPreview.textContent = celda;
+
+    const U = getLimitesSuperioresEscala(data);
+    if (!U || U[1] === null) {
+        document.getElementById('excel-formula-num').textContent = '⚠️ Configura un puntaje total válido para generar la fórmula.';
+        document.getElementById('excel-formula-desc').textContent = '⚠️ Configura un puntaje total válido para generar la fórmula.';
+        return;
+    }
+
+    // Identificar límites activos (1 a 5)
+    // Ej.: U[1]=20, U[2]=22, U[3]=25, U[4]=28, U[5]=30
+    const u1 = U[1];
+    const u2 = U[2] !== null ? U[2] : u1;
+    const u3 = U[3] !== null ? U[3] : u2;
+    const u4 = U[4] !== null ? U[4] : u3;
+    const u5 = U[5] !== null ? U[5] : total;
+
+    let formulaNum = '';
+    let formulaDesc = '';
+
+    if (tipo === 'siconjunto') {
+        // Formato SI.CONJUNTO estándar en español
+        formulaNum = `=SI.CONJUNTO(${celda}<=${u1}${sep} 1${sep} ${celda}<=${u2}${sep} 2${sep} ${celda}<=${u3}${sep} 3${sep} ${celda}<=${u4}${sep} 4${sep} ${celda}<=${u5}${sep} 5)`;
+        formulaDesc = `=SI.CONJUNTO(${celda}<=${u1}${sep} "Insuficiente"${sep} ${celda}<=${u2}${sep} "Aceptable"${sep} ${celda}<=${u3}${sep} "Bueno"${sep} ${celda}<=${u4}${sep} "Muy bueno"${sep} ${celda}<=${u5}${sep} "Excelente")`;
+        if (protegerVacio) {
+            formulaNum = `=SI(${celda}=""${sep} ""${sep} SI.CONJUNTO(${celda}<=${u1}${sep} 1${sep} ${celda}<=${u2}${sep} 2${sep} ${celda}<=${u3}${sep} 3${sep} ${celda}<=${u4}${sep} 4${sep} ${celda}<=${u5}${sep} 5))`;
+            formulaDesc = `=SI(${celda}=""${sep} ""${sep} SI.CONJUNTO(${celda}<=${u1}${sep} "Insuficiente"${sep} ${celda}<=${u2}${sep} "Aceptable"${sep} ${celda}<=${u3}${sep} "Bueno"${sep} ${celda}<=${u4}${sep} "Muy bueno"${sep} ${celda}<=${u5}${sep} "Excelente"))`;
+        }
+    } else if (tipo === 'sianidado') {
+        // Formato SI anidado clásico
+        formulaNum = `=SI(${celda}<=${u1}${sep} 1${sep} SI(${celda}<=${u2}${sep} 2${sep} SI(${celda}<=${u3}${sep} 3${sep} SI(${celda}<=${u4}${sep} 4${sep} 5))))`;
+        formulaDesc = `=SI(${celda}<=${u1}${sep} "Insuficiente"${sep} SI(${celda}<=${u2}${sep} "Aceptable"${sep} SI(${celda}<=${u3}${sep} "Bueno"${sep} SI(${celda}<=${u4}${sep} "Muy bueno"${sep} "Excelente"))))`;
+        if (protegerVacio) {
+            formulaNum = `=SI(${celda}=""${sep} ""${sep} SI(${celda}<=${u1}${sep} 1${sep} SI(${celda}<=${u2}${sep} 2${sep} SI(${celda}<=${u3}${sep} 3${sep} SI(${celda}<=${u4}${sep} 4${sep} 5)))))`;
+            formulaDesc = `=SI(${celda}=""${sep} ""${sep} SI(${celda}<=${u1}${sep} "Insuficiente"${sep} SI(${celda}<=${u2}${sep} "Aceptable"${sep} SI(${celda}<=${u3}${sep} "Bueno"${sep} SI(${celda}<=${u4}${sep} "Muy bueno"${sep} "Excelente")))))`;
+        }
+    } else if (tipo === 'ifs') {
+        // Formato IFS en inglés
+        formulaNum = `=IFS(${celda}<=${u1}${sep} 1${sep} ${celda}<=${u2}${sep} 2${sep} ${celda}<=${u3}${sep} 3${sep} ${celda}<=${u4}${sep} 4${sep} ${celda}<=${u5}${sep} 5)`;
+        formulaDesc = `=IFS(${celda}<=${u1}${sep} "Insuficiente"${sep} ${celda}<=${u2}${sep} "Aceptable"${sep} ${celda}<=${u3}${sep} "Bueno"${sep} ${celda}<=${u4}${sep} "Muy bueno"${sep} ${celda}<=${u5}${sep} "Excelente")`;
+        if (protegerVacio) {
+            formulaNum = `=IF(${celda}=""${sep} ""${sep} IFS(${celda}<=${u1}${sep} 1${sep} ${celda}<=${u2}${sep} 2${sep} ${celda}<=${u3}${sep} 3${sep} ${celda}<=${u4}${sep} 4${sep} ${celda}<=${u5}${sep} 5))`;
+            formulaDesc = `=IF(${celda}=""${sep} ""${sep} IFS(${celda}<=${u1}${sep} "Insuficiente"${sep} ${celda}<=${u2}${sep} "Aceptable"${sep} ${celda}<=${u3}${sep} "Bueno"${sep} ${celda}<=${u4}${sep} "Muy bueno"${sep} ${celda}<=${u5}${sep} "Excelente"))`;
+        }
+    }
+
+    document.getElementById('excel-formula-num').textContent = formulaNum;
+    document.getElementById('excel-formula-desc').textContent = formulaDesc;
+
+    generarVistaPreviaExcel(celda, data, u1, u2, u3, u4, u5);
+}
+
+function generarVistaPreviaExcel(celda, data, u1, u2, u3, u4, u5) {
+    const contenedor = document.getElementById('excel-preview-wrapper');
+    if (!contenedor) return;
+
+    // Obtener ejemplos representativos de cada rango
+    const ejemplos = [
+        { alumno: 'Alumno 1', puntaje: u1 > 0 ? Math.floor(u1 * 0.8) : 0, nota: 1, desc: 'Insuficiente' },
+        { alumno: 'Alumno 2', puntaje: u2, nota: 2, desc: 'Aceptable' },
+        { alumno: 'Alumno 3', puntaje: u3, nota: 3, desc: 'Bueno' },
+        { alumno: 'Alumno 4', puntaje: u4, nota: 4, desc: 'Muy bueno' },
+        { alumno: 'Alumno 5', puntaje: u5, nota: 5, desc: 'Excelente' }
+    ];
+
+    let html = `<table>
+        <thead>
+            <tr>
+                <th style="width:25%;">Estudiante</th>
+                <th style="width:25%;">Celda ${celda} (Puntaje)</th>
+                <th style="width:25%;">Resultado Numérico</th>
+                <th style="width:25%;">Resultado Descriptor</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    ejemplos.forEach(item => {
+        html += `<tr>
+            <td>${item.alumno}</td>
+            <td><strong>${item.puntaje}</strong> pts</td>
+            <td><strong style="color:var(--accent);font-size:15px;">${item.nota}</strong></td>
+            <td><span class="badge" style="background:${item.nota >= 2 ? 'rgba(34,197,94,.15)' : 'rgba(239,68,68,.15)'};color:${item.nota >= 2 ? '#22c55e' : '#ef4444'};">${item.desc}</span></td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>`;
+    contenedor.innerHTML = html;
+}
+
+function copiarFormulaTexto(elementId, btn) {
+    const pre = document.getElementById(elementId);
+    if (!pre) return;
+    const texto = pre.textContent;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(texto).then(() => mostrarFeedbackCopiado(btn));
+    } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = texto;
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            mostrarFeedbackCopiado(btn);
+        } catch (err) {}
+        textarea.remove();
+    }
+}
+
+function mostrarFeedbackCopiado(btn) {
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<span>✓ ¡Copiado!</span>';
+    btn.style.background = 'var(--success)';
+    setTimeout(() => {
+        btn.innerHTML = origHtml;
+        btn.style.background = '';
+    }, 2000);
+}
+
+// Listeners de controles de Excel
+document.getElementById('excel-celda').addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    actualizarFormulasExcel();
+});
+document.getElementById('excel-separador').addEventListener('change', actualizarFormulasExcel);
+document.getElementById('excel-tipo-formula').addEventListener('change', actualizarFormulasExcel);
+document.getElementById('excel-check-vacio').addEventListener('change', actualizarFormulasExcel);
+
+// ─── WHATSAPP: COMPARTIR Y CONTADOR REAL ────────────────────
+const SHARE_KEY = 'calif_compartidos';
+const VISITAS_API_URL = 'https://api-visitas-ei0d.onrender.com';
+
+function getLocalShareCount() {
     return parseInt(localStorage.getItem(SHARE_KEY) || '0', 10);
 }
 
-function setShareCount(n) {
-    localStorage.setItem(SHARE_KEY, String(n));
-    document.getElementById('share-count').textContent = n;
+function setShareCountDisplay(n) {
+    const el = document.getElementById('share-count');
+    if (el) el.textContent = n;
 }
 
-function trackShare() {
-    const params = new URLSearchParams({ project: 'calificaciones-py', page: 'compartido' });
-    fetch(`${VISITAS_API}/track?${params}`, { mode: 'no-cors' }).catch(() => {});
+let shareCountActual = getLocalShareCount();
+setShareCountDisplay(shareCountActual);
+
+async function sincronizarContadorWhatsAppReal() {
+    try {
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 4000);
+
+        let resp = await fetch(`${VISITAS_API_URL}/api/stats/shares?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
+        let data = resp && resp.ok ? await resp.json() : null;
+
+        if (!data || !data.total) {
+            resp = await fetch(`${VISITAS_API_URL}/api/stats/shares?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
+            data = resp && resp.ok ? await resp.json() : null;
+        }
+        clearTimeout(timeout);
+
+        if (data) {
+            const remoteTotal = (data.by_platform && data.by_platform.whatsapp) ? data.by_platform.whatsapp : (data.total || 0);
+            shareCountActual = Math.max(remoteTotal, getLocalShareCount());
+            localStorage.setItem(SHARE_KEY, String(shareCountActual));
+            setShareCountDisplay(shareCountActual);
+        }
+    } catch (e) {
+        // En caso de corte de red, se mantiene el valor local
+    }
 }
 
 document.getElementById('btn-whatsapp').addEventListener('click', function () {
     const texto = encodeURIComponent(
         '📊 Escala de Calificaciones\n\n' +
-        'Generá tus escalas de calificaciones y calculá notas fácilmente.\n\n' +
+        'Generá tus escalas de calificaciones y calculá notas fácilmente con la escala oficial de Paraguay.\n\n' +
         '🔗 ' + window.location.href
     );
     const waUrl = `https://wa.me/?text=${texto}`;
 
-    // Mobile: navegación directa (evita popup blocker)
-    // Desktop: popup centrado
+    // Incrementar en UI y almacenamiento local
+    shareCountActual++;
+    localStorage.setItem(SHARE_KEY, String(shareCountActual));
+    setShareCountDisplay(shareCountActual);
+
+    // Registrar en segundo plano en la API de analíticas
+    try {
+        fetch(`${VISITAS_API_URL}/track/share?project=Calificaciones.py&platform=whatsapp`, { mode: 'no-cors' }).catch(() => {});
+        fetch(`${VISITAS_API_URL}/track/share?project=calificaciones-py&platform=whatsapp`, { mode: 'no-cors' }).catch(() => {});
+    } catch (e) {}
+
     const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     if (isMobile) {
         window.location.href = waUrl;
     } else {
         window.open(waUrl, '_blank', 'width=700,height=600');
     }
-
-    // Incrementar contador local
-    setShareCount(getShareCount() + 1);
-    trackShare();
 });
 
-// Inicializar contador
-document.getElementById('share-count').textContent = getShareCount();
+// ─── PESTAÑA MAPA DE UBICACIÓN (LEAFLET + OSM) ──────────────
+let leafletMap = null;
+let leafletMarkersLayer = null;
+let mapaInicializado = false;
 
-// Auto-generate on load
+function inicializarMapaUsuarios() {
+    if (mapaInicializado) {
+        if (leafletMap) {
+            setTimeout(() => { leafletMap.invalidateSize(); }, 200);
+        }
+        return;
+    }
+
+    const container = document.getElementById('mapa-leaflet');
+    if (!container || typeof L === 'undefined') return;
+
+    try {
+        // Centrar mapa por defecto en Paraguay
+        leafletMap = L.map('mapa-leaflet', {
+            center: [-23.4425, -58.4438],
+            zoom: 5,
+            minZoom: 2,
+            maxZoom: 18,
+            scrollWheelZoom: false
+        });
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>',
+            maxZoom: 19
+        }).addTo(leafletMap);
+
+        leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+        mapaInicializado = true;
+
+        cargarDatosUbicacionMapa();
+
+        setTimeout(() => {
+            if (leafletMap) leafletMap.invalidateSize();
+        }, 250);
+    } catch (err) {
+        console.error('Error al inicializar mapa:', err);
+        const loadingEl = document.getElementById('mapa-loading');
+        if (loadingEl) {
+            loadingEl.innerHTML = '<span style="color:#ef4444;">⚠️ No se pudo inicializar el mapa en este momento.</span>';
+        }
+    }
+}
+
+async function cargarDatosUbicacionMapa() {
+    const loadingEl = document.getElementById('mapa-loading');
+    const loadingText = document.getElementById('mapa-loading-text');
+    if (loadingEl) loadingEl.style.opacity = '1';
+    if (loadingText) loadingText.textContent = 'Consultando registros geográficos...';
+
+    let data = null;
+    try {
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 5000);
+
+        let resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
+        data = resp && resp.ok ? await resp.json() : null;
+
+        if (!data || !data.cities || !data.cities.length) {
+            resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
+            data = resp && resp.ok ? await resp.json() : null;
+        }
+        clearTimeout(timeout);
+    } catch (e) {}
+
+    // Datos por defecto representativos de Paraguay si la API es nueva o no tiene historial
+    const defaultCities = [
+        { city: 'Asunción', country: 'Paraguay', region: 'Capital', lat: -25.2637, lon: -57.5759, count: 1 }
+    ];
+
+    const cities = (data && data.cities && data.cities.length) ? data.cities : defaultCities;
+    const countries = (data && data.countries && data.countries.length) ? data.countries : [{ country: 'Paraguay', count: 1 }];
+
+    renderizarPuntosEnMapa(cities, countries);
+
+    if (loadingEl) {
+        loadingEl.style.opacity = '0';
+        setTimeout(() => { loadingEl.style.display = 'none'; }, 300);
+    }
+}
+
+function renderizarPuntosEnMapa(cities, countries) {
+    if (!leafletMap || !leafletMarkersLayer) return;
+
+    leafletMarkersLayer.clearLayers();
+    const bounds = [];
+    let totalVisitasGeo = 0;
+
+    cities.forEach(city => {
+        if (!city.lat || !city.lon) return;
+        const lat = parseFloat(city.lat);
+        const lon = parseFloat(city.lon);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        totalVisitasGeo += (city.count || 1);
+        const size = Math.min(26, Math.max(9, Math.sqrt(city.count || 1) * 6));
+        const markerColor = (city.count > 10) ? '#ef4444' : (city.count > 3 ? '#f59e0b' : '#38bdf8');
+
+        const marker = L.circleMarker([lat, lon], {
+            radius: size,
+            fillColor: markerColor,
+            color: '#ffffff',
+            weight: 2,
+            opacity: 0.9,
+            fillOpacity: 0.65
+        });
+
+        const ubicacionTexto = `${city.city}${city.region ? ', ' + city.region : ''} (${city.country})`;
+        marker.bindTooltip(`<strong>${ubicacionTexto}</strong><br>${city.count} consulta${city.count !== 1 ? 's' : ''}`, { direction: 'top' });
+        marker.bindPopup(`
+            <div style="font-family:'Inter',sans-serif;font-size:12px;color:#1e293b;padding:2px;">
+                <strong style="font-size:14px;color:#0f172a;">${city.city}</strong><br>
+                <span>${city.region ? city.region + ', ' : ''}${city.country}</span><br>
+                <div style="margin-top:4px;padding:3px 6px;background:#e2e8f0;border-radius:4px;font-weight:700;display:inline-block;">
+                    ${city.count} consulta${city.count !== 1 ? 's' : ''}
+                </div>
+            </div>
+        `);
+
+        leafletMarkersLayer.addLayer(marker);
+        bounds.push([lat, lon]);
+    });
+
+    // Actualizar badges numéricos
+    document.getElementById('mapa-total-ciudades').textContent = cities.length;
+    document.getElementById('mapa-total-paises').textContent = countries.length;
+    document.getElementById('mapa-total-visitas-geo').textContent = totalVisitasGeo;
+
+    // Actualizar lista de ciudades destacadas
+    const listEl = document.getElementById('mapa-top-ciudades-list');
+    if (listEl) {
+        listEl.innerHTML = cities.slice(0, 10).map(c => `
+            <span style="background:var(--input-bg);border:1px solid var(--card-border);padding:4px 10px;border-radius:14px;color:var(--text);display:inline-flex;align-items:center;gap:4px;">
+                📍 ${c.city}: <strong style="color:var(--accent);">${c.count}</strong>
+            </span>
+        `).join('');
+    }
+
+    if (bounds.length > 0 && leafletMap) {
+        try {
+            leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 });
+        } catch (e) {}
+    }
+}
+
+function recargarMapaUsuarios() {
+    const btn = document.getElementById('btn-recargar-mapa');
+    if (btn) btn.innerHTML = '⏳ Actualizando...';
+    const loadingEl = document.getElementById('mapa-loading');
+    if (loadingEl) {
+        loadingEl.style.display = 'flex';
+        loadingEl.style.opacity = '1';
+    }
+    cargarDatosUbicacionMapa().finally(() => {
+        if (btn) btn.innerHTML = '🔄 Actualizar mapa';
+        if (leafletMap) leafletMap.invalidateSize();
+    });
+}
+
+// ─── CONTADOR DE VISITAS DIMINUTO EN PIE ─────────────────────
+// "un contador de visitas, no importa si es el mismo IP"
+const VISITAS_LOCAL_KEY = 'calif_total_vistas';
+
+function actualizarVisitasFooter(num) {
+    const el = document.getElementById('contador-visitas-num');
+    if (el) {
+        el.textContent = Number(num).toLocaleString('es-PY');
+    }
+}
+
+async function registrarYObtenerVisitas() {
+    // 1. Conteo acumulativo local sin importar IP (cada recarga o visita cuenta)
+    let localHits = parseInt(localStorage.getItem(VISITAS_LOCAL_KEY) || '0', 10) + 1;
+    localStorage.setItem(VISITAS_LOCAL_KEY, String(localHits));
+    actualizarVisitasFooter(localHits);
+
+    // 2. Notificar al backend de visitas (fire-and-forget)
+    try {
+        const path = encodeURIComponent(window.location.pathname || '/');
+        fetch(`${VISITAS_API_URL}/track?project=Calificaciones.py&page=${path}`, { mode: 'no-cors' }).catch(() => {});
+        fetch(`${VISITAS_API_URL}/track?project=calificaciones-py&page=${path}`, { mode: 'no-cors' }).catch(() => {});
+    } catch (e) {}
+
+    // 3. Consultar estadísticas globales registradas en el backend
+    try {
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 4000);
+
+        let resp = await fetch(`${VISITAS_API_URL}/api/stats/overview?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
+        let data = resp && resp.ok ? await resp.json() : null;
+
+        if (!data || !data.total) {
+            resp = await fetch(`${VISITAS_API_URL}/api/stats/overview?project=calificaciones-py`, { signal: ctrl.signal }).catch(() => null);
+            data = resp && resp.ok ? await resp.json() : null;
+        }
+        clearTimeout(timeout);
+
+        if (data && typeof data.total === 'number') {
+            const consolidado = Math.max(data.total, localHits);
+            localStorage.setItem(VISITAS_LOCAL_KEY, String(consolidado));
+            actualizarVisitasFooter(consolidado);
+        }
+    } catch (e) {}
+}
+
+// ─── INICIALIZACIÓN GENERAL ──────────────────────────────────
 actualizarTotalLabel();
 generarTabla();
+sincronizarContadorWhatsAppReal();
+registrarYObtenerVisitas();
 </script>
 </body>
 </html>
