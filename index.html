@@ -964,6 +964,23 @@ document.getElementById('btn-whatsapp').addEventListener('click', function() {
 
 
 
+// PESTAÑAS (TABS) - EVENTOS
+document.querySelectorAll('.tab-link').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const tabId = btn.getAttribute('data-tab');
+        if (!tabId) return;
+        const pane = document.getElementById(tabId);
+        if (!pane) return;
+        // Quito active de todas las pestañas y tabs
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-link').forEach(b => b.classList.remove('active'));
+        // Activo la pestaña clicada
+        if (pane) pane.classList.add('active');
+        if (btn) btn.classList.add('active');
+    });
+});
+
 // CONTRASTE (MODO DIA/NOCHE)
 document.getElementById('btn-contraste').addEventListener('click', function() {
     document.body.classList.toggle('high-contrast');
