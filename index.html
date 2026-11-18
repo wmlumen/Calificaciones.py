@@ -715,7 +715,7 @@ function generarTablaEscala(N, exigenciaPct) {
         const filaClase = i % 2 === 0 ? ' style="background:var(--table-row-alt);"' : '';
         html += `
             <tr${filaClase}>
-                <td style="padding:10px;border:1px solid var(--table-border);">${i} (${i === 1 ? 'Inferior' : i === 2 ? 'Basico' : i === 3 ? 'Satisfactorio' : i === 4 ? 'Avanzado' : 'Superior'})</td>
+                <td style="padding:10px;border:1px solid var(--table-border);">${i}</td>
                 <td style="padding:10px;border:1px solid var(--table-border);">${descriptor}</td>
                 <td style="padding:10px;text-align:center;border:1px solid var(--table-border);">${rangoTexto}</td>
             </tr>
