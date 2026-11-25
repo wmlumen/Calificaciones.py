@@ -126,11 +126,11 @@ body {
 }
 .btn-primary:hover { background: var(--accent-hover); }
 .btn-whatsapp {
-    background: rgba(37,211,102,.15);
+    background: rgba(37,211,102,.12);
     color: #25d366;
-    border: 1px solid transparent;
+    border: 1px solid rgba(37,211,102,.25);
     border-radius: 8px;
-    padding: 7px 16px;
+    padding: 6px 14px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
@@ -138,17 +138,47 @@ body {
     font-family: inherit;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
-.btn-whatsapp:hover { background: #25d366; color: #fff; }
+.btn-whatsapp:hover { 
+    background: #25d366; 
+    color: #fff; 
+    border-color: #25d366;
+}
+.btn-whatsapp:hover .share-counter { color: #fff; }
+.btn-whatsapp:hover .share-box { background: rgba(0,0,0,.2); color: #fff; }
+.btn-whatsapp:hover .share-box .num { color: #fff; }
 .share-counter {
     font-size: 11px;
     color: var(--muted);
     display: inline-flex;
     align-items: center;
-    gap: 3px;
+    gap: 5px;
+    line-height: 1;
 }
-.share-counter .num { font-weight: 700; color: var(--accent-2, #22c55e); }
+.share-tag {
+    font-weight: 600;
+    color: currentColor;
+}
+.share-box {
+    background: rgba(255,255,255,.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    letter-spacing: .2px;
+}
+.share-box .num { 
+    font-weight: 700; 
+    color: #25d366; 
+    font-size: 11px;
+}
+.share-sep {
+    opacity: .4;
+    font-size: 10px;
+}
 .btn.ativo {
     background: var(--accent);
     color: #fff;
@@ -418,12 +448,16 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         <div class="top-actions">
             <button class="btn" id="btn-contraste" aria-label="Alternar alto contraste" title="Alto contraste">⚫</button>
             <button class="btn" onclick="window.print()" aria-label="Imprimir / PDF" title="Imprimir / PDF">🖨️</button>
-            <button class="btn-whatsapp" id="btn-whatsapp" aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp">
+            <button class="btn-whatsapp" id="btn-whatsapp" aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp (Hoy / Histórico)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                 </svg>
                 <span class="share-counter" id="share-badge">
-                    <span class="num" id="share-count">0</span>
+                    <span class="share-tag">Compartir</span>
+                    <span class="share-box" title="Compartidos hoy (actual)">Hoy: <strong class="num" id="share-count-actual">0</strong></span>
+                    <span class="share-sep">/</span>
+                    <span class="share-box" title="Compartidos acumulados (histórico)">Histórico: <strong class="num" id="share-count-historico">0</strong></span>
+                    <span id="share-count" style="display:none;">0</span>
                 </span>
             </button>
         </div>
@@ -458,7 +492,7 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                     </div>
                     <div style="flex:2;min-width:200px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
-                        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts">
+                        <div style="display:flex;gap:5px;flex-wrap:wrap;" id="exigencia-opts" class="exigencia-opts">
                             <button class="btn" data-v="50" style="padding:5px 12px;font-size:12px;">50%</button>
                             <button class="btn" data-v="60" style="padding:5px 12px;font-size:12px;">60%</button>
                             <button class="btn ativo" data-v="70" style="padding:5px 12px;font-size:12px;">70%</button>
@@ -556,15 +590,11 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                     <pre id="excel-formula-desc" class="formula-code"></pre>
                 </div>
 
-                <!-- VISTA PREVIA INTERACTIVA EN PLANILLA -->
                 <div style="margin-top:22px;">
-                    <div class="card-title" style="font-size:16px;margin-bottom:4px;">Simulación en vivo de tu planilla</div>
-                    <div class="card-sub" style="margin-bottom:12px;">Así evaluará Excel los puntajes según la celda <strong id="preview-celda-label">A2</strong>:</div>
-
-                    <div id="excel-preview-wrapper" style="overflow-x:auto;"></div>
+                    <div class="card-title" style="font-size:16px;margin-bottom:4px;">Cómo usar la fórmula</div>
+                    <div class="card-sub" style="margin-bottom:12px;">Paso a paso para copiar y pegar la fórmula en Excel.</div>
 
                     <div style="margin-top:14px;padding:14px 18px;background:var(--accent-soft);border:1px solid var(--accent);border-radius:var(--radius);font-size:12px;line-height:1.6;color:var(--text);">
-                        <strong style="color:var(--accent);">💡 ¿Cómo aplicarla paso a paso en Excel?</strong><br>
                         1. Presioná <strong>Copiar fórmula</strong> en la opción deseada (numérica o descriptor).<br>
                         2. En tu archivo Excel, hacé clic en la celda donde va la calificación (por ejemplo <code>B2</code> si el puntaje está en <code>A2</code>).<br>
                         3. Pegá la fórmula presionando <code>Ctrl + V</code> y tocá <code>Enter</code>.<br>
@@ -792,8 +822,7 @@ function actualizarExcelFormula() {
     document.getElementById('excel-formula-num').textContent = formulaNum;
     document.getElementById('excel-formula-desc').textContent = formulaDesc;
 
-    // GENERAR VISTA PREVIA
-    generarVistaPreviaExcel(celda, ranges);
+    // Vista previa eliminada: sin simulador
 }
 
 function generarVistaPreviaExcel(celdaTexto, ranges) {
@@ -950,19 +979,76 @@ document.getElementById('excel-celda').addEventListener('change', function() {
     actualizarExcelFormula();
 });
 
-// MANEJO DEL BOTON DE COMPARTIR EN WHATSAPP
+// ─── MANEJO DEL BOTÓN DE COMPARTIR EN WHATSAPP (ACTUAL E HISTÓRICO) ───
+const SHARE_TODAY_KEY = 'calif_shares_' + new Date().toISOString().slice(0, 10);
+const SHARE_HIST_KEY = 'calif_shares_historico';
+const VISITAS_API_URL = 'https://api-visitas-ei0d.onrender.com';
+
+function getLocalShares() {
+    return {
+        actual: parseInt(localStorage.getItem(SHARE_TODAY_KEY) || '0', 10),
+        historico: parseInt(localStorage.getItem(SHARE_HIST_KEY) || '0', 10)
+    };
+}
+
+function renderShareCounters(actual, historico) {
+    const elActual = document.getElementById('share-count-actual');
+    const elHist = document.getElementById('share-count-historico');
+    const elLegacy = document.getElementById('share-count');
+    if (elActual) elActual.textContent = actual;
+    if (elHist) elHist.textContent = historico;
+    if (elLegacy) elLegacy.textContent = historico;
+}
+
+// Pintar inmediato al cargar
+let sharesState = getLocalShares();
+renderShareCounters(sharesState.actual, sharesState.historico);
+
+async function sincronizarSharesBackend() {
+    try {
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 4000);
+        const resp = await fetch(`${VISITAS_API_URL}/api/stats/shares?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
+        clearTimeout(timeout);
+        if (resp && resp.ok) {
+            const data = await resp.json();
+            const remoteTotal = (data.by_platform && typeof data.by_platform.whatsapp === 'number')
+                ? data.by_platform.whatsapp
+                : (data.total || 0);
+
+            const current = getLocalShares();
+            const consolidado = Math.max(remoteTotal, current.historico);
+            localStorage.setItem(SHARE_HIST_KEY, String(consolidado));
+            renderShareCounters(current.actual, consolidado);
+        }
+    } catch (e) {}
+}
+
 document.getElementById('btn-whatsapp').addEventListener('click', function() {
-    const url = 'https://api-visitas-ei0d.onrender.com/track/share?project=Calificaciones.py&platform=whatsapp';
-    const texto = 'Hola, comparte esta herramienta gratuita para calcular escalas de calificaciones: https://calificaciones-py.vercel.app/';
+    // 1. Incrementar contador actual e histórico
+    let s = getLocalShares();
+    s.actual += 1;
+    s.historico += 1;
+    localStorage.setItem(SHARE_TODAY_KEY, String(s.actual));
+    localStorage.setItem(SHARE_HIST_KEY, String(s.historico));
+    renderShareCounters(s.actual, s.historico);
 
+    // 2. Notificar al backend de estadísticas (GET)
+    const trackUrl = `${VISITAS_API_URL}/track/share?project=Calificaciones.py&platform=whatsapp`;
+    fetch(trackUrl, { mode: 'no-cors' }).catch(() => {});
+
+    // 3. Abrir WhatsApp
+    const texto = '📊 Escala de Calificaciones MEC Paraguay\n\n' +
+        'Generá tus escalas de calificaciones y calculá notas fácilmente con la herramienta en línea:\n' +
+        window.location.href;
     const urlWhatsApp = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-    window.open(urlWhatsApp, '_blank');
-
-    // INCREMENTAR EL CONTADOR EN EL SERVIDOR (opcional)
-    fetch(url, { method: 'POST', mode: 'no-cors' }).catch(() => {});
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.location.href = urlWhatsApp;
+    } else {
+        window.open(urlWhatsApp, '_blank', 'width=700,height=600');
+    }
 });
-
-
 
 // PESTAÑAS (TABS) - EVENTOS
 document.querySelectorAll('.tab-link').forEach(btn => {
@@ -988,23 +1074,23 @@ document.getElementById('btn-contraste').addEventListener('click', function() {
 
 // INICIALIZACION
 actualizarTodo();
+sincronizarSharesBackend();
 
-// MARCAR LOS CONTADORES DE WHATSAPP AL CARGAR LA PAGINA (DESDE LA API DE ESTADISTICAS)
-fetch('https://api-visitas-ei0d.onrender.com/api/stats/overview?project=Calificaciones.py')
+// CONTADOR DE VISITAS DEL PIE (OVERVIEW TOTAL VISITAS)
+fetch(`${VISITAS_API_URL}/api/stats/overview?project=Calificaciones.py`)
     .then(res => res.json())
     .then(data => {
-        const total = data.total_visitas || 0;
-        document.getElementById('share-count').textContent = total;
-        document.getElementById('contador-visitas-num').textContent = total;
+        const total = (data && typeof data.total === 'number') ? data.total : (data.total_visitas || 0);
+        const footerVisitas = document.getElementById('contador-visitas-num');
+        if (footerVisitas) footerVisitas.textContent = total;
     })
     .catch(() => {
-        // SI LA API FALLA, USAR EL LOCALSTORAGE (MANTENER LA DURA DEBE SER EN EL BACKEND, PERO PARA LA DEMO LO MANTENEMOS EN LOCALSTORAGE)
         let stored = localStorage.getItem('calificaciones-visitas');
-        let count = stored ? parseInt(stored) : 0;
+        let count = stored ? parseInt(stored, 10) : 0;
         count++;
         localStorage.setItem('calificaciones-visitas', count.toString());
-        document.getElementById('share-count').textContent = count;
-        document.getElementById('contador-visitas-num').textContent = count;
+        const footerVisitas = document.getElementById('contador-visitas-num');
+        if (footerVisitas) footerVisitas.textContent = count;
     });
 </script>
 </body>
