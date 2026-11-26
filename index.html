@@ -412,6 +412,9 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
 .leaflet-popup-tip {
     background: #1e293b !important;
 }
+.leaflet-popup-open .leaflet-tooltip {
+    display: none !important;
+}
 .map-badge-city {
     background: var(--input-bg);
     border: 1px solid var(--card-border);
@@ -1239,6 +1242,19 @@ function activarPestanaMapa() {
     }
 }
 
+let cityMarkersMap = {};
+
+function normalizarCiudad(nombre) {
+    if (!nombre) return '';
+    const n = nombre.trim();
+    const l = n.toLowerCase();
+    if (l === 'asuncion' || l === 'asunción') return 'Asunción';
+    if (l === 'caacupe' || l === 'caacupé') return 'Caacupé';
+    if (l === 'ypacarai' || l === 'ypacaraí') return 'Ypacaraí';
+    if (l === 'lambare' || l === 'lambaré') return 'Lambaré';
+    return n;
+}
+
 function inicializarMapaLeaflet() {
     if (mapaInicializado) return;
     mapaInicializado = true;
@@ -1251,10 +1267,9 @@ function inicializarMapaLeaflet() {
             maxZoom: 18
         }).setView([userCoords.lat, userCoords.lon], 11);
 
-        // Capa base CartoDB Voyager (limpia, moderna y de alto contraste)
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-            subdomains: 'abcd',
+        // Capa base OpenStreetMap estándar (gratuita, oficial, nítida y sin API key)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
             maxZoom: 19
         }).addTo(leafletMap);
 
@@ -1352,13 +1367,35 @@ async function cargarDatosUbicacionMapa() {
     } catch (e) {}
 
     const defaultCities = [
-        { city: 'Asunción', country: 'Paraguay', region: 'Asunción', lat: -25.2869, lon: -57.6511, count: 65 },
-        { city: 'Ciudad del Este', country: 'Paraguay', region: 'Alto Paraná', lat: -25.5036, lon: -54.6507, count: 16 },
-        { city: 'San Lorenzo', country: 'Paraguay', region: 'Central', lat: -25.3385, lon: -57.5118, count: 3 },
-        { city: 'Luque', country: 'Paraguay', region: 'Central', lat: -25.2682, lon: -57.4863, count: 3 }
+        { city: 'Asunción', country: 'Paraguay', region: 'Asunción', lat: -25.2869, lon: -57.6511, count: 77 },
+        { city: 'Ciudad del Este', country: 'Paraguay', region: 'Alto Paraná', lat: -25.5036, lon: -54.6507, count: 19 },
+        { city: 'San Lorenzo', country: 'Paraguay', region: 'Central', lat: -25.3385, lon: -57.5118, count: 4 },
+        { city: 'Luque', country: 'Paraguay', region: 'Central', lat: -25.2682, lon: -57.4863, count: 4 },
+        { city: 'Lambaré', country: 'Paraguay', region: 'Central', lat: -25.3468, lon: -57.6065, count: 4 }
     ];
 
-    const cities = (data && data.cities && data.cities.length) ? data.cities : defaultCities;
+    // Consolidar ciudades normalizadas (unificar Asunción / Asuncion, etc.)
+    const rawCities = (data && data.cities && data.cities.length) ? data.cities : defaultCities;
+    const consolidatedMap = {};
+    rawCities.forEach(c => {
+        if (!c.lat || !c.lon) return;
+        const normCity = normalizarCiudad(c.city);
+        const country = c.country || 'Paraguay';
+        const key = `${country}|${normCity}`;
+        if (!consolidatedMap[key]) {
+            consolidatedMap[key] = {
+                city: normCity,
+                country: country,
+                region: c.region || '',
+                lat: parseFloat(c.lat),
+                lon: parseFloat(c.lon),
+                count: 0
+            };
+        }
+        consolidatedMap[key].count += (c.count || 1);
+    });
+
+    const cities = Object.values(consolidatedMap);
     const countries = (data && data.countries && data.countries.length) ? data.countries : [{ country: 'Paraguay', count: cities.reduce((acc, c) => acc + (c.count||1), 0) }];
 
     datosMapaCargados = { cities, countries };
@@ -1374,6 +1411,7 @@ function renderizarBurbujasEnMapa(cities, countries) {
     if (!leafletMap || !leafletMarkersLayer) return;
 
     leafletMarkersLayer.clearLayers();
+    cityMarkersMap = {};
     const bounds = [];
     let totalVisitasGeo = 0;
 
@@ -1392,7 +1430,7 @@ function renderizarBurbujasEnMapa(cities, countries) {
         totalVisitasGeo += count;
 
         // Tamaño proporcional a la cantidad de visitas (si hay más juntos, más grande)
-        const radius = Math.min(48, Math.max(9, Math.round(9 + Math.sqrt(count) * 4.8)));
+        const radius = Math.min(46, Math.max(10, Math.round(9 + Math.sqrt(count) * 4.2)));
         const color = getColorPais(city.country);
 
         // CircleMarker con estilo nítido
@@ -1404,6 +1442,9 @@ function renderizarBurbujasEnMapa(cities, countries) {
             opacity: 0.95,
             fillOpacity: 0.72
         });
+
+        // Guardar referencia para enfocar con chip de ciudad
+        cityMarkersMap[city.city] = bubble;
 
         // Tooltip al pasar el mouse
         const ubicacionTexto = `${city.city}${city.region ? ', ' + city.region : ''} (${city.country})`;
@@ -1443,7 +1484,7 @@ function renderizarBurbujasEnMapa(cities, countries) {
         }
 
         // Si es una burbuja pequeña, asegurarse de elevarla por encima
-        if (count <= 3) {
+        if (count <= 5) {
             bubble.bringToFront();
         }
 
@@ -1490,6 +1531,11 @@ function renderizarBurbujasEnMapa(cities, countries) {
 function enfocarCiudadEnMapa(lat, lon, nombre) {
     if (!leafletMap) return;
     leafletMap.flyTo([lat, lon], 12, { duration: 1.2 });
+    if (cityMarkersMap && cityMarkersMap[nombre]) {
+        setTimeout(() => {
+            cityMarkersMap[nombre].openPopup();
+        }, 500);
+    }
 }
 
 function centrarEnMiUbicacion() {
