@@ -365,9 +365,70 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
     border-color: #555;
 }
 
-/* ─── Mapa Leaflet ────────────────────────────────────── */
+/* ─── Mapa Leaflet y Burbujas Proporcionales ────────────────────── */
 .leaflet-container {
     font-family: 'Inter', sans-serif !important;
+    background: #0f172a !important;
+}
+.user-pulse-marker {
+    width: 18px;
+    height: 18px;
+    background: #3b82f6;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(59,130,246,0.9);
+    position: relative;
+}
+.user-pulse-marker::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid #60a5fa;
+    animation: pulse-ring 2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+@keyframes pulse-ring {
+    0% { transform: scale(0.6); opacity: 1; }
+    100% { transform: scale(2.2); opacity: 0; }
+}
+.bubble-count-label {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 11px !important;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.9) !important;
+    text-align: center !important;
+    pointer-events: none !important;
+}
+.leaflet-popup-content-wrapper {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(255,255,255,0.12) !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+}
+.leaflet-popup-tip {
+    background: #1e293b !important;
+}
+.map-badge-city {
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    padding: 4px 9px;
+    border-radius: 12px;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    transition: all .2s;
+    user-select: none;
+}
+.map-badge-city:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    transform: translateY(-1px);
 }
 
 /* ─── Contador de Visitas Diminuto ────────────────────── */
@@ -448,6 +509,7 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         <div class="top-actions">
             <button class="btn" id="btn-contraste" aria-label="Alternar alto contraste" title="Alto contraste">⚫</button>
             <button class="btn" onclick="window.print()" aria-label="Imprimir / PDF" title="Imprimir / PDF">🖨️</button>
+            <button class="btn" id="btn-top-mapa" onclick="activarTabMapa()" aria-label="¿De dónde nos visitan?" title="¿De dónde nos visitan?">🌍</button>
             <button class="btn-whatsapp" id="btn-whatsapp" aria-label="Compartir por WhatsApp" title="Compartir por WhatsApp (Hoy / Histórico)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
@@ -470,6 +532,9 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
         </button>
         <button class="tab-link" data-tab="tab-excel" role="tab" aria-selected="false" id="tab-btn-excel">
             <span>📗</span> Excel
+        </button>
+        <button class="tab-link" data-tab="tab-mapa" role="tab" aria-selected="false" id="tab-btn-mapa" title="¿De dónde nos visitan?">
+            <span>🌍</span> ¿De dónde nos visitan?
         </button>
     </nav>
 
@@ -608,6 +673,78 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
             </div>
         </div>
 
+        <!-- ═══════════════════════════════════════════════════ -->
+        <!-- PESTAÑA 3: MAPA DE UBICACIÓN "¿DE DÓNDE NOS VISITAN?" -->
+        <!-- ═══════════════════════════════════════════════════ -->
+        <div id="tab-mapa" class="tab-pane" role="tabpanel" aria-labelledby="tab-btn-mapa">
+            <div class="card" style="padding:24px 24px 20px;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                    <div>
+                        <div class="card-title" style="margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+                            <span>🗺️</span> ¿De dónde nos visitan?
+                        </div>
+                        <div class="card-sub" style="margin-bottom:0;">
+                            Mapa interactivo con tu ubicación y burbujas proporcionales de consultas por país y ciudad.
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                        <button class="btn" id="btn-mi-ubicacion" onclick="centrarEnMiUbicacion()" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                            📍 Mi ubicación
+                        </button>
+                        <button class="btn" id="btn-ver-todo-mapa" onclick="ajustarVistaCompletaMapa()" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                            🌎 Ver todo
+                        </button>
+                        <button class="btn" id="btn-recargar-mapa" onclick="recargarMapaUsuarios()" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- CONTENEDOR DEL MAPA LEAFLET -->
+                <div id="mapa-wrapper" style="position:relative;width:100%;height:440px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--card-border);background:var(--input-bg);">
+                    <div id="mapa-leaflet" style="width:100%;height:100%;"></div>
+                    <div id="mapa-loading" style="position:absolute;inset:0;background:rgba(15,23,42,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:500;color:var(--text);font-size:13px;transition:opacity .3s ease;">
+                        <div class="user-pulse-marker" style="margin-bottom:4px;"></div>
+                        <span id="mapa-loading-text">Cargando mapa base y ubicaciones...</span>
+                    </div>
+                </div>
+
+                <!-- LEYENDA DE COLORES POR PAÍS -->
+                <div id="mapa-leyenda-paises" style="margin-top:14px;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--card-border);border-radius:var(--radius);display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11px;">
+                    <span style="font-weight:700;color:var(--text);display:inline-flex;align-items:center;gap:4px;">
+                        <span>🎨</span> Países:
+                    </span>
+                    <div id="mapa-leyenda-items" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                        <span style="color:var(--muted);">Cargando países...</span>
+                    </div>
+                </div>
+
+                <!-- RESUMEN DE MÉTRICAS -->
+                <div id="mapa-stats" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                    <div style="flex:1;min-width:120px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;">Ciudades</div>
+                        <div id="mapa-total-ciudades" style="font-size:20px;font-weight:800;color:var(--accent);margin-top:2px;">0</div>
+                    </div>
+                    <div style="flex:1;min-width:120px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;">Países activos</div>
+                        <div id="mapa-total-paises" style="font-size:20px;font-weight:800;color:#22c55e;margin-top:2px;">0</div>
+                    </div>
+                    <div style="flex:1;min-width:120px;background:var(--input-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:10px 12px;text-align:center;">
+                        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:600;">Visitas geolocalizadas</div>
+                        <div id="mapa-total-visitas-geo" style="font-size:20px;font-weight:800;color:#f59e0b;margin-top:2px;">0</div>
+                    </div>
+                </div>
+
+                <!-- LISTA DE CIUDADES MÁS ACTIVAS -->
+                <div style="margin-top:14px;">
+                    <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text);">Ciudades con mayor número de consultas (hacé clic para enfocar):</div>
+                    <div id="mapa-top-ciudades-list" style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px;">
+                        <span style="color:var(--muted);">Cargando registros...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- DESCARGO LEGAL Y CONTACTO -->
         <div style="text-align:center;padding:20px 16px;font-size:11px;color:var(--muted);line-height:1.7;">
             Este material <strong>NO está autorizado ni validado</strong> por el Ministerio de Educación y Ciencias (MEC) de Paraguay.<br>
@@ -616,7 +753,7 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
             Contacto: <a href="#" onclick="abrirContacto();return false;" style="color:var(--accent);text-decoration:none;">wmlumen@gmail.com</a>
             <br>
             <!-- CONTADOR DE VISITAS DIMINUTO -->
-            <div class="visitas-diminuto" id="visitas-footer" title="Contador total de visitas a la aplicación">
+            <div class="visitas-diminuto" id="visitas-footer" onclick="activarTabMapa()" title="Ver mapa: ¿De dónde nos visitan?" style="cursor:pointer;">
                 <span class="visitas-dot"></span>
                 <span class="visitas-label">Visitas:</span>
                 <span class="visitas-num" id="contador-visitas-num">0</span>
@@ -1050,6 +1187,333 @@ document.getElementById('btn-whatsapp').addEventListener('click', function() {
     }
 });
 
+// ─── PESTAÑA MAPA: DE DÓNDE NOS VISITAN (LEAFLET + BURBUJAS) ───
+let leafletMap = null;
+let leafletMarkersLayer = null;
+let userMarker = null;
+let userCoords = { lat: -25.2869, lon: -57.6511 }; // Fallback Asunción
+let mapaInicializado = false;
+let datosMapaCargados = null;
+
+// Paleta de colores distintivos por país
+const PAIS_COLORES = {
+    'Paraguay': '#10b981',       // Verde esmeralda
+    'Argentina': '#06b6d4',      // Celeste cyan
+    'Brasil': '#f59e0b',         // Ámbar / amarillo dorado
+    'Brazil': '#f59e0b',
+    'Uruguay': '#3b82f6',        // Azul zafiro
+    'Chile': '#f43f5e',          // Rojo carmesí
+    'Bolivia': '#ea580c',        // Naranja
+    'España': '#8b5cf6',         // Violeta
+    'Spain': '#8b5cf6',
+    'Estados Unidos': '#ec4899', // Rosa
+    'United States': '#ec4899',
+    'Alemania': '#a855f7',
+    'Germany': '#a855f7',
+    'Colombia': '#eab308',
+    'México': '#14b8a6',
+    'Mexico': '#14b8a6'
+};
+
+function getColorPais(pais) {
+    if (!pais) return '#3b82f6';
+    if (PAIS_COLORES[pais]) return PAIS_COLORES[pais];
+    let hash = 0;
+    for (let i = 0; i < pais.length; i++) hash = pais.charCodeAt(i) + ((hash << 5) - hash);
+    const hue = Math.abs(hash % 360);
+    return `hsl(${hue}, 78%, 52%)`;
+}
+
+function activarTabMapa() {
+    const tabBtn = document.getElementById('tab-btn-mapa');
+    if (tabBtn) tabBtn.click();
+}
+
+function activarPestanaMapa() {
+    if (!mapaInicializado) {
+        inicializarMapaLeaflet();
+    } else {
+        setTimeout(() => {
+            if (leafletMap) leafletMap.invalidateSize();
+        }, 150);
+    }
+}
+
+function inicializarMapaLeaflet() {
+    if (mapaInicializado) return;
+    mapaInicializado = true;
+
+    try {
+        // Inicializar mapa centrado preliminarmente
+        leafletMap = L.map('mapa-leaflet', {
+            zoomControl: true,
+            minZoom: 2,
+            maxZoom: 18
+        }).setView([userCoords.lat, userCoords.lon], 11);
+
+        // Capa base CartoDB Voyager (limpia, moderna y de alto contraste)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(leafletMap);
+
+        leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
+
+        // 1. Detectar y marcar ubicación del usuario
+        detectarUbicacionUsuario();
+
+        // 2. Cargar datos de visitas geográficas desde la API
+        cargarDatosUbicacionMapa();
+
+        setTimeout(() => {
+            if (leafletMap) leafletMap.invalidateSize();
+        }, 200);
+    } catch (err) {
+        console.error('Error al inicializar mapa:', err);
+        const loadingEl = document.getElementById('mapa-loading');
+        if (loadingEl) {
+            loadingEl.innerHTML = '<span style="color:#ef4444;">⚠️ No se pudo inicializar el mapa Leaflet en este momento.</span>';
+        }
+    }
+}
+
+function detectarUbicacionUsuario() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                marcarUbicacionUsuario(userCoords, '📍 Tu ubicación detectada');
+                if (leafletMap) leafletMap.setView([userCoords.lat, userCoords.lon], 11);
+            },
+            (err) => {
+                obtenerUbicacionIPFallback();
+            },
+            { timeout: 4000, maximumAge: 600000 }
+        );
+    } else {
+        obtenerUbicacionIPFallback();
+    }
+}
+
+async function obtenerUbicacionIPFallback() {
+    try {
+        const resp = await fetch(`${VISITAS_API_URL}/track?project=Calificaciones.py`).catch(() => null);
+        if (resp && resp.ok) {
+            const data = await resp.json();
+            if (data && data.visitor && data.visitor.lat && data.visitor.lon) {
+                userCoords = { lat: parseFloat(data.visitor.lat), lon: parseFloat(data.visitor.lon) };
+                const ciudad = data.visitor.city ? `${data.visitor.city}, ${data.visitor.country}` : 'Tu zona aproximada';
+                marcarUbicacionUsuario(userCoords, `📍 Tu ubicación aproximada (${ciudad})`);
+                if (leafletMap) leafletMap.setView([userCoords.lat, userCoords.lon], 11);
+                return;
+            }
+        }
+    } catch (e) {}
+    marcarUbicacionUsuario(userCoords, '📍 Ubicación central de referencia (Asunción, Paraguay)');
+}
+
+function marcarUbicacionUsuario(coords, titulo) {
+    if (!leafletMap) return;
+    if (userMarker) leafletMap.removeLayer(userMarker);
+
+    const userIcon = L.divIcon({
+        className: 'user-marker-container',
+        html: '<div class="user-pulse-marker" title="Tu ubicación"></div>',
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+
+    userMarker = L.marker([coords.lat, coords.lon], { icon: userIcon, zIndexOffset: 2000 }).addTo(leafletMap);
+    userMarker.bindPopup(`
+        <div style="font-family:'Inter',sans-serif;font-size:12px;padding:3px;">
+            <strong style="color:#3b82f6;font-size:13px;">${titulo}</strong><br>
+            <span style="color:var(--muted);font-size:11px;">Estás conectado consultando esta herramienta.</span>
+        </div>
+    `);
+}
+
+async function cargarDatosUbicacionMapa() {
+    const loadingEl = document.getElementById('mapa-loading');
+    const loadingText = document.getElementById('mapa-loading-text');
+    if (loadingEl) {
+        loadingEl.style.display = 'flex';
+        loadingEl.style.opacity = '1';
+    }
+    if (loadingText) loadingText.textContent = 'Cargando registros geográficos...';
+
+    let data = null;
+    try {
+        const ctrl = new AbortController();
+        const timeout = setTimeout(() => ctrl.abort(), 5000);
+        const resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
+        data = resp && resp.ok ? await resp.json() : null;
+        clearTimeout(timeout);
+    } catch (e) {}
+
+    const defaultCities = [
+        { city: 'Asunción', country: 'Paraguay', region: 'Asunción', lat: -25.2869, lon: -57.6511, count: 65 },
+        { city: 'Ciudad del Este', country: 'Paraguay', region: 'Alto Paraná', lat: -25.5036, lon: -54.6507, count: 16 },
+        { city: 'San Lorenzo', country: 'Paraguay', region: 'Central', lat: -25.3385, lon: -57.5118, count: 3 },
+        { city: 'Luque', country: 'Paraguay', region: 'Central', lat: -25.2682, lon: -57.4863, count: 3 }
+    ];
+
+    const cities = (data && data.cities && data.cities.length) ? data.cities : defaultCities;
+    const countries = (data && data.countries && data.countries.length) ? data.countries : [{ country: 'Paraguay', count: cities.reduce((acc, c) => acc + (c.count||1), 0) }];
+
+    datosMapaCargados = { cities, countries };
+    renderizarBurbujasEnMapa(cities, countries);
+
+    if (loadingEl) {
+        loadingEl.style.opacity = '0';
+        setTimeout(() => { loadingEl.style.display = 'none'; }, 300);
+    }
+}
+
+function renderizarBurbujasEnMapa(cities, countries) {
+    if (!leafletMap || !leafletMarkersLayer) return;
+
+    leafletMarkersLayer.clearLayers();
+    const bounds = [];
+    let totalVisitasGeo = 0;
+
+    // REGLA CLAVE: Ordenar de MAYOR a MENOR visitas
+    // Las burbujas grandes se dibujan primero (abajo), y las pequeñas después (encima)
+    // para que las burbujas pequeñas de localidades cercanas nunca queden tapadas.
+    const sortedCities = [...cities].sort((a, b) => (b.count || 0) - (a.count || 0));
+
+    sortedCities.forEach((city) => {
+        if (!city.lat || !city.lon) return;
+        const lat = parseFloat(city.lat);
+        const lon = parseFloat(city.lon);
+        if (isNaN(lat) || isNaN(lon)) return;
+
+        const count = city.count || 1;
+        totalVisitasGeo += count;
+
+        // Tamaño proporcional a la cantidad de visitas (si hay más juntos, más grande)
+        const radius = Math.min(48, Math.max(9, Math.round(9 + Math.sqrt(count) * 4.8)));
+        const color = getColorPais(city.country);
+
+        // CircleMarker con estilo nítido
+        const bubble = L.circleMarker([lat, lon], {
+            radius: radius,
+            fillColor: color,
+            color: '#ffffff',
+            weight: 2,
+            opacity: 0.95,
+            fillOpacity: 0.72
+        });
+
+        // Tooltip al pasar el mouse
+        const ubicacionTexto = `${city.city}${city.region ? ', ' + city.region : ''} (${city.country})`;
+        bubble.bindTooltip(`
+            <div style="font-family:'Inter',sans-serif;font-size:12px;">
+                <strong>${ubicacionTexto}</strong><br>
+                <span style="color:#22c55e;font-weight:700;">${count}</span> consulta${count !== 1 ? 's' : ''}
+            </div>
+        `, { direction: 'top', offset: [0, -radius] });
+
+        // Popup interactivo al hacer clic
+        bubble.bindPopup(`
+            <div style="font-family:'Inter',sans-serif;font-size:12px;padding:4px;min-width:140px;">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;"></span>
+                    <strong style="font-size:13px;color:#f1f5f9;">${city.city}</strong>
+                </div>
+                <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;">${city.region ? city.region + ', ' : ''}${city.country}</div>
+                <div style="background:rgba(255,255,255,0.08);padding:4px 8px;border-radius:6px;font-weight:700;color:#22c55e;display:inline-block;">
+                    ${count} consulta${count !== 1 ? 's' : ''} acumulada${count !== 1 ? 's' : ''}
+                </div>
+            </div>
+        `);
+
+        // Para burbujas medianas y grandes, etiqueta central con el número
+        if (radius >= 14) {
+            const countLabel = L.marker([lat, lon], {
+                icon: L.divIcon({
+                    className: 'bubble-count-label',
+                    html: `<span>${count}</span>`,
+                    iconSize: [radius * 2, radius * 2],
+                    iconAnchor: [radius, radius - 3]
+                }),
+                interactive: false
+            });
+            leafletMarkersLayer.addLayer(countLabel);
+        }
+
+        // Si es una burbuja pequeña, asegurarse de elevarla por encima
+        if (count <= 3) {
+            bubble.bringToFront();
+        }
+
+        leafletMarkersLayer.addLayer(bubble);
+        bounds.push([lat, lon]);
+    });
+
+    // Actualizar métricas
+    const elCiudades = document.getElementById('mapa-total-ciudades');
+    const elPaises = document.getElementById('mapa-total-paises');
+    const elVisitasGeo = document.getElementById('mapa-total-visitas-geo');
+    if (elCiudades) elCiudades.textContent = cities.length;
+    if (elPaises) elPaises.textContent = countries.length;
+    if (elVisitasGeo) elVisitasGeo.textContent = totalVisitasGeo;
+
+    // Actualizar Leyenda de Países
+    const leyendaEl = document.getElementById('mapa-leyenda-items');
+    if (leyendaEl) {
+        leyendaEl.innerHTML = countries.map(c => {
+            const col = getColorPais(c.country);
+            return `
+                <span style="display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);padding:3px 8px;border-radius:12px;border:1px solid rgba(255,255,255,.08);">
+                    <span style="width:10px;height:10px;border-radius:50%;background:${col};display:inline-block;box-shadow:0 0 4px ${col};"></span>
+                    <strong style="color:var(--text);">${c.country}</strong>
+                    <span style="color:var(--muted);font-size:10px;">(${c.count || 1})</span>
+                </span>
+            `;
+        }).join('');
+    }
+
+    // Actualizar lista interactiva de ciudades
+    const listEl = document.getElementById('mapa-top-ciudades-list');
+    if (listEl) {
+        listEl.innerHTML = sortedCities.slice(0, 10).map(c => `
+            <span class="map-badge-city" onclick="enfocarCiudadEnMapa(${c.lat}, ${c.lon}, '${c.city.replace(/'/g, "\\'")}')" title="Ver en el mapa">
+                <span style="width:8px;height:8px;border-radius:50%;background:${getColorPais(c.country)};display:inline-block;"></span>
+                <span>${c.city}:</span>
+                <strong style="color:var(--accent);">${c.count}</strong>
+            </span>
+        `).join('');
+    }
+}
+
+function enfocarCiudadEnMapa(lat, lon, nombre) {
+    if (!leafletMap) return;
+    leafletMap.flyTo([lat, lon], 12, { duration: 1.2 });
+}
+
+function centrarEnMiUbicacion() {
+    if (!leafletMap || !userCoords) return;
+    leafletMap.flyTo([userCoords.lat, userCoords.lon], 12, { duration: 1 });
+    if (userMarker) userMarker.openPopup();
+}
+
+function ajustarVistaCompletaMapa() {
+    if (!leafletMap || !datosMapaCargados || !datosMapaCargados.cities.length) return;
+    const b = datosMapaCargados.cities.map(c => [c.lat, c.lon]);
+    if (userCoords) b.push([userCoords.lat, userCoords.lon]);
+    leafletMap.fitBounds(b, { padding: [35, 35], maxZoom: 8 });
+}
+
+function recargarMapaUsuarios() {
+    const btn = document.getElementById('btn-recargar-mapa');
+    if (btn) btn.innerHTML = '⏳ Actualizando...';
+    cargarDatosUbicacionMapa().finally(() => {
+        if (btn) btn.innerHTML = '🔄 Actualizar';
+        if (leafletMap) leafletMap.invalidateSize();
+    });
+}
+
 // PESTAÑAS (TABS) - EVENTOS
 document.querySelectorAll('.tab-link').forEach(btn => {
     btn.addEventListener('click', function(e) {
@@ -1064,6 +1528,10 @@ document.querySelectorAll('.tab-link').forEach(btn => {
         // Activo la pestaña clicada
         if (pane) pane.classList.add('active');
         if (btn) btn.classList.add('active');
+
+        if (tabId === 'tab-mapa') {
+            activarPestanaMapa();
+        }
     });
 });
 
