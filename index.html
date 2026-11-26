@@ -433,6 +433,25 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
     background: var(--accent-soft);
     transform: translateY(-1px);
 }
+.btn-map-layer {
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all .15s ease;
+    font-weight: 500;
+    font-family: inherit;
+}
+.btn-map-layer:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, .06);
+}
+.btn-map-layer.ativo {
+    background: var(--accent) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
 
 /* ─── Contador de Visitas Diminuto ────────────────────── */
 .visitas-diminuto {
@@ -556,7 +575,14 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                     <div style="flex:1;min-width:130px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Total de puntos (N)</label>
                         <input type="number" id="total-puntos" value="30" min="1" inputmode="numeric" autocomplete="off" style="padding:8px 12px;font-size:14px;">
-                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 12 pts) o ingresa valor manual en Personalizado.</div>
+                        <div style="font-size:11px;color:var(--muted);margin-top:3px;">Puntaje total de la prueba (ej.: 12 pts, 72 pts...).</div>
+                        <div style="margin-top:5px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                            <span style="font-size:11px;color:var(--muted);">Simular:</span>
+                            <button type="button" class="btn" style="padding:2px 7px;font-size:11px;" onclick="fijarTotalPuntos(30)">30 pts</button>
+                            <button type="button" class="btn" style="padding:2px 7px;font-size:11px;" onclick="fijarTotalPuntos(50)">50 pts</button>
+                            <button type="button" class="btn" style="padding:2px 8px;font-size:11px;font-weight:700;border-color:var(--accent);color:var(--accent);background:var(--accent-soft);" onclick="fijarTotalPuntos(72)" title="Simular escala de 72 puntos">⭐ 72 pts</button>
+                            <button type="button" class="btn" style="padding:2px 7px;font-size:11px;" onclick="fijarTotalPuntos(100)">100 pts</button>
+                        </div>
                     </div>
                     <div style="flex:2;min-width:200px;">
                         <label style="display:block;font-size:12px;font-weight:600;margin-bottom:4px;color:var(--text);">Nivel de exigencia</label>
@@ -575,7 +601,17 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                 <button class="btn btn-primary" id="btn-generar" style="width:100%;padding:8px;font-size:14px;">Generar tabla</button>
 
                 <div id="tabla-wrapper" style="margin-top:16px;">
-                    <div class="card-title" style="font-size:16px;margin-bottom:10px;">Tabla generada</div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+                        <div class="card-title" style="font-size:16px;margin:0;">Tabla generada</div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn btn-primary" id="btn-descargar-imagen" onclick="descargarImagenTablaCompacta()" title="Descargar como imagen PNG compacta" style="font-size:12px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px;">
+                                <span>📸</span> Bajar imagen compacta (PNG)
+                            </button>
+                            <button class="btn" id="btn-copiar-tabla" onclick="copiarTablaAlPortapapeles(this)" title="Copiar datos de la tabla" style="font-size:12px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px;">
+                                <span>📋</span> Copiar tabla
+                            </button>
+                        </div>
+                    </div>
                     <div id="tabla-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid var(--danger);border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;"></div>
                     <div id="tabla-contenido" style="overflow-x:auto;"></div>
                     <div id="tabla-meta" style="margin-top:10px;font-size:12px;color:var(--muted);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;"></div>
@@ -690,7 +726,13 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                             Mapa interactivo con tu ubicación y burbujas proporcionales de consultas por país y ciudad.
                         </div>
                     </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <!-- Selector de capas de mapa base -->
+                        <div style="display:inline-flex;gap:3px;background:var(--input-bg);padding:3px;border-radius:8px;border:1px solid var(--card-border);">
+                            <button type="button" class="btn btn-map-layer ativo" id="btn-layer-osm" onclick="cambiarCapaBase('osm')" title="OpenStreetMap Estándar">🗺️ OSM</button>
+                            <button type="button" class="btn btn-map-layer" id="btn-layer-esri" onclick="cambiarCapaBase('esri')" title="Esri Calles">🗺️ Esri</button>
+                            <button type="button" class="btn btn-map-layer" id="btn-layer-sat" onclick="cambiarCapaBase('sat')" title="Esri Satelital">🛰️ Satélite</button>
+                        </div>
                         <button class="btn" id="btn-mi-ubicacion" onclick="centrarEnMiUbicacion()" style="font-size:12px;display:inline-flex;align-items:center;gap:5px;">
                             📍 Mi ubicación
                         </button>
@@ -706,7 +748,7 @@ tr:nth-child(even) td { background: var(--table-row-alt); }
                 <!-- CONTENEDOR DEL MAPA LEAFLET -->
                 <div id="mapa-wrapper" style="position:relative;width:100%;height:440px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--card-border);background:var(--input-bg);">
                     <div id="mapa-leaflet" style="width:100%;height:100%;"></div>
-                    <div id="mapa-loading" style="position:absolute;inset:0;background:rgba(15,23,42,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:500;color:var(--text);font-size:13px;transition:opacity .3s ease;">
+                    <div id="mapa-loading" style="position:absolute;inset:0;background:rgba(15,23,42,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:500;color:var(--text);font-size:13px;transition:opacity .3s ease;pointer-events:none;">
                         <div class="user-pulse-marker" style="margin-bottom:4px;"></div>
                         <span id="mapa-loading-text">Cargando mapa base y ubicaciones...</span>
                     </div>
@@ -908,9 +950,28 @@ function generarTablaEscala(N, exigenciaPct) {
     return { html, meta: metaHtml, error: null };
 }
 
+function fijarTotalPuntos(val) {
+    const input = document.getElementById('total-puntos');
+    if (input) {
+        input.value = val;
+        actualizarTodo();
+    }
+}
+
+function getExigencia() {
+    const activeBtn = document.querySelector('.exigencia-opts .ativo');
+    if (activeBtn && activeBtn.dataset.v && activeBtn.dataset.v !== 'custom') {
+        const val = parseInt(activeBtn.dataset.v, 10);
+        if (!isNaN(val) && val >= 1 && val <= 99) return val;
+    }
+    const inputVal = parseInt(document.getElementById('exigencia-valor').value, 10);
+    if (!isNaN(inputVal) && inputVal >= 1 && inputVal <= 99) return inputVal;
+    return 70;
+}
+
 function mostrarTablaEscala() {
-    const N = parseInt(document.getElementById('total-puntos').value) || 30;
-    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
+    const N = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+    const exigencia = getExigencia();
 
     if (isNaN(N) || N < 1) {
         return { html: '', meta: '', error: 'El valor total de puntos debe ser un número mayor a 0.' };
@@ -925,7 +986,9 @@ function mostrarTablaEscala() {
 function actualizarExigencia(btn, valor) {
     document.querySelectorAll('.exigencia-opts .btn').forEach(b => b.classList.remove('ativo'));
     btn.classList.add('ativo');
-    document.getElementById('exigencia-valor').disabled = true;
+    const input = document.getElementById('exigencia-valor');
+    input.value = valor;
+    input.disabled = true;
     document.getElementById('exigencia-label').textContent = valor + '%';
     document.getElementById('excel-exigencia-badge').textContent = valor + '%';
     actualizarTodo();
@@ -933,12 +996,16 @@ function actualizarExigencia(btn, valor) {
 
 function activarExigenciaPersonalizada() {
     document.querySelectorAll('.exigencia-opts .btn').forEach(b => b.classList.remove('ativo'));
-    document.getElementById('exigencia-valor').disabled = false;
-    document.getElementById('exigencia-valor').focus();
+    const btnCustom = document.querySelector('.exigencia-opts button[data-v="custom"]');
+    if (btnCustom) btnCustom.classList.add('ativo');
+    const input = document.getElementById('exigencia-valor');
+    input.disabled = false;
+    input.focus();
+    manejarCambioExigenciaPersonalizada();
 }
 
 function manejarCambioExigenciaPersonalizada() {
-    const valor = parseInt(document.getElementById('exigencia-valor').value);
+    const valor = parseInt(document.getElementById('exigencia-valor').value, 10);
     if (!isNaN(valor) && valor >= 1 && valor <= 99) {
         document.getElementById('exigencia-label').textContent = valor + '%';
         document.getElementById('excel-exigencia-badge').textContent = valor + '%';
@@ -947,9 +1014,9 @@ function manejarCambioExigenciaPersonalizada() {
 }
 
 function actualizarExcelFormula() {
-    const N = parseInt(document.getElementById('total-puntos').value) || 30;
-    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
-    const celda = document.getElementById('excel-celda').value.toUpperCase();
+    const N = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+    const exigencia = getExigencia();
+    const celda = (document.getElementById('excel-celda').value || 'A2').toUpperCase();
 
     const { LI, ranges, points } = calcularEscala(N, exigencia);
 
@@ -961,8 +1028,203 @@ function actualizarExcelFormula() {
 
     document.getElementById('excel-formula-num').textContent = formulaNum;
     document.getElementById('excel-formula-desc').textContent = formulaDesc;
+}
 
-    // Vista previa eliminada: sin simulador
+// ─── DESCARGA DE IMAGEN COMPACTA EN FORMATO PNG (ALTA DEFINICIÓN 2X) ───
+function descargarImagenTablaCompacta() {
+    const N = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+    const exigencia = getExigencia();
+    const { LI, ranges } = calcularEscala(N, exigencia);
+
+    const scale = 2;
+    const width = 540;
+    const height = 480;
+    const canvas = document.createElement('canvas');
+    canvas.width = width * scale;
+    canvas.height = height * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(scale, scale);
+
+    // Fondo oscuro premium
+    const radius = 16;
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(0, 0, width, height, radius);
+    else ctx.rect(0, 0, width, height);
+    ctx.fill();
+
+    // Borde
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#334155';
+    ctx.stroke();
+
+    // Franja decorativa superior
+    const grad = ctx.createLinearGradient(0, 0, width, 0);
+    grad.addColorStop(0, '#2563eb');
+    grad.addColorStop(0.5, '#3b82f6');
+    grad.addColorStop(1, '#10b981');
+    ctx.fillStyle = grad;
+    if (ctx.roundRect) {
+        ctx.beginPath();
+        ctx.roundRect(0, 0, width, 6, [radius, radius, 0, 0]);
+        ctx.fill();
+    } else {
+        ctx.fillRect(0, 0, width, 6);
+    }
+
+    // Título Principal
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#f8fafc';
+    ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('ESCALA DE CALIFICACIONES', width / 2, 40);
+
+    // Subtítulo
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '500 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('Normativa MEC Paraguay · Criterios Generales de Promoción', width / 2, 59);
+
+    // Fila de Métricas / Parámetros
+    const metaY = 76;
+    const metaH = 46;
+    ctx.fillStyle = '#1e293b';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(24, metaY, width - 48, metaH, 8);
+    else ctx.rect(24, metaY, width - 48, metaH);
+    ctx.fill();
+    ctx.strokeStyle = '#334155';
+    ctx.stroke();
+
+    const col1 = width * 0.22;
+    const col2 = width * 0.50;
+    const col3 = width * 0.78;
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('TOTAL PUNTOS (N)', col1, metaY + 17);
+    ctx.fillStyle = '#38bdf8';
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${N} pts`, col1, metaY + 36);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('NIVEL EXIGENCIA', col2, metaY + 17);
+    ctx.fillStyle = '#f59e0b';
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${exigencia}%`, col2, metaY + 36);
+
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText('LOGRO MÍNIMO (LI)', col3, metaY + 17);
+    ctx.fillStyle = '#22c55e';
+    ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${LI} pts`, col3, metaY + 36);
+
+    // Filas de Calificaciones (de 5 a 1)
+    const filas = [
+        { nota: '5', desc: 'Excelente', color: '#10b981', rango: ranges[5] },
+        { nota: '4', desc: 'Muy bueno', color: '#3b82f6', rango: ranges[4] },
+        { nota: '3', desc: 'Bueno', color: '#f59e0b', rango: ranges[3] },
+        { nota: '2', desc: 'Aceptable', color: '#a855f7', rango: ranges[2] },
+        { nota: '1', desc: 'Insuficiente', color: '#ef4444', rango: ranges[1] }
+    ];
+
+    const startY = 138;
+    const rowH = 48;
+    const rowGap = 8;
+    const tableX = 24;
+    const tableW = width - 48;
+
+    filas.forEach((f, idx) => {
+        const y = startY + idx * (rowH + rowGap);
+
+        // Fondo de fila
+        ctx.fillStyle = '#1e293b';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(tableX, y, tableW, rowH, 8);
+        else ctx.rect(tableX, y, tableW, rowH);
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.stroke();
+
+        // Insignia circular de la Nota
+        const badgeX = tableX + 30;
+        const badgeY = y + rowH / 2;
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.arc(badgeX, badgeY, 15, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(f.nota, badgeX, badgeY);
+
+        // Descriptor cualitativo
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#f8fafc';
+        ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(f.desc, badgeX + 22, badgeY);
+
+        // Rango de puntaje
+        let rangoStr = '—';
+        if (f.rango) {
+            rangoStr = (f.rango[0] === f.rango[1]) ? `${f.rango[0]} pts` : `${f.rango[0]} a ${f.rango[1]} pts`;
+        }
+        ctx.textAlign = 'right';
+        ctx.fillStyle = f.color;
+        ctx.font = 'bold 15px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        ctx.fillText(rangoStr, tableX + tableW - 20, badgeY);
+    });
+
+    // Pie de la tarjeta
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#64748b';
+    ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const ahora = new Date();
+    const fechaStr = `${ahora.toLocaleDateString('es-PY')} ${ahora.toLocaleTimeString('es-PY', { hour: '2-digit', minute: '2-digit' })}`;
+    ctx.fillText(`calificaciones-py.vercel.app • Generado el ${fechaStr}`, width / 2, height - 14);
+
+    // Descargar archivo PNG
+    const link = document.createElement('a');
+    link.download = `escala-calificaciones-${N}pts-${exigencia}pct.png`;
+    link.href = canvas.toDataURL('image/png');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Feedback en botón
+    const btn = document.getElementById('btn-descargar-imagen');
+    if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> ¡Imagen compacta descargada!';
+        setTimeout(() => { btn.innerHTML = orig; }, 2200);
+    }
+}
+
+function copiarTablaAlPortapapeles(btn) {
+    const N = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+    const exigencia = getExigencia();
+    const { LI, ranges } = calcularEscala(N, exigencia);
+
+    let texto = `ESCALA DE CALIFICACIONES (MEC PARAGUAY)\n`;
+    texto += `Total de puntos (N): ${N} pts | Exigencia: ${exigencia}% | LI: ${LI} pts\n`;
+    texto += `----------------------------------------\n`;
+    for (let i = 5; i >= 1; i--) {
+        const r = ranges[i];
+        const rangoStr = r ? (r[0] === r[1] ? `${r[0]} pts` : `${r[0]} - ${r[1]} pts`) : '—';
+        texto += `Nota ${i} (${descriptores[i]}): ${rangoStr}\n`;
+    }
+    texto += `----------------------------------------\n`;
+    texto += `https://calificaciones-py.vercel.app/`;
+
+    navigator.clipboard.writeText(texto).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<span>✓</span> ¡Copiado!';
+        setTimeout(() => { btn.innerHTML = orig; }, 1800);
+    });
 }
 
 function generarVistaPreviaExcel(celdaTexto, ranges) {
@@ -1054,8 +1316,8 @@ function actualizarTodo() {
 }
 
 function calcularAlumno() {
-    const N = parseInt(document.getElementById('total-puntos').value) || 30;
-    const exigencia = document.querySelector('.exigencia-opts .ativo') ? parseInt(document.querySelector('.exigencia-opts .ativo').dataset.v) : parseInt(document.getElementById('exigencia-valor').value);
+    const N = parseInt(document.getElementById('total-puntos').value, 10) || 30;
+    const exigencia = getExigencia();
     const puntaje = parseFloat(document.getElementById('calc-puntaje').value) || 0;
 
     const { ranges } = calcularEscala(N, exigencia);
@@ -1090,10 +1352,26 @@ function calcularAlumno() {
 
 // EVENT LISTENERS
 
-// GENERADOR DE ESCALA - EVENTOS
+// GENERADOR DE ESCALA - EVENTOS REACTIVOS
+const inputTotalPuntos = document.getElementById('total-puntos');
+if (inputTotalPuntos) {
+    inputTotalPuntos.addEventListener('input', actualizarTodo);
+    inputTotalPuntos.addEventListener('change', actualizarTodo);
+}
 
-document.getElementById('total-puntos').addEventListener('change', actualizarTodo);
-document.getElementById('exigencia-valor').addEventListener('change', manejarCambioExigenciaPersonalizada);
+const inputExigenciaValor = document.getElementById('exigencia-valor');
+if (inputExigenciaValor) {
+    inputExigenciaValor.addEventListener('input', manejarCambioExigenciaPersonalizada);
+    inputExigenciaValor.addEventListener('change', manejarCambioExigenciaPersonalizada);
+}
+
+const btnGenerar = document.getElementById('btn-generar');
+if (btnGenerar) {
+    btnGenerar.addEventListener('click', (e) => {
+        e.preventDefault();
+        actualizarTodo();
+    });
+}
 
 document.querySelectorAll('.exigencia-opts .btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1236,13 +1514,15 @@ function activarPestanaMapa() {
     if (!mapaInicializado) {
         inicializarMapaLeaflet();
     } else {
-        setTimeout(() => {
-            if (leafletMap) leafletMap.invalidateSize();
-        }, 150);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 60);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 250);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 600);
     }
 }
 
 let cityMarkersMap = {};
+let baseLayers = {};
+let currentBaseLayer = null;
 
 function normalizarCiudad(nombre) {
     if (!nombre) return '';
@@ -1267,11 +1547,36 @@ function inicializarMapaLeaflet() {
             maxZoom: 18
         }).setView([userCoords.lat, userCoords.lon], 11);
 
-        // Capa base OpenStreetMap estándar (gratuita, oficial, nítida y sin API key)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        // 1. OpenStreetMap Estándar Oficial (rápido, nítido y sin restricciones)
+        baseLayers.osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+            subdomains: ['a', 'b', 'c'],
             maxZoom: 19
-        }).addTo(leafletMap);
+        });
+
+        // 2. Esri World Street Map (Capa de calles alternativa ultra-resiliente)
+        baseLayers.esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri, DeLorme, USGS, NPS',
+            maxZoom: 18
+        });
+
+        // 3. Esri World Imagery (Imágenes Satelitales de alta resolución)
+        baseLayers.sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri, Earthstar Geographics',
+            maxZoom: 18
+        });
+
+        // Activar OSM por defecto
+        currentBaseLayer = baseLayers.osm;
+        currentBaseLayer.addTo(leafletMap);
+
+        // Auto-fallback en caso de bloqueo de red local en OpenStreetMap
+        baseLayers.osm.on('tileerror', function() {
+            if (currentBaseLayer === baseLayers.osm) {
+                console.warn('Fallo de teselas en OSM, conmutando a Esri Street...');
+                cambiarCapaBase('esri');
+            }
+        });
 
         leafletMarkersLayer = L.layerGroup().addTo(leafletMap);
 
@@ -1281,16 +1586,31 @@ function inicializarMapaLeaflet() {
         // 2. Cargar datos de visitas geográficas desde la API
         cargarDatosUbicacionMapa();
 
-        setTimeout(() => {
-            if (leafletMap) leafletMap.invalidateSize();
-        }, 200);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 100);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 350);
+        setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 800);
     } catch (err) {
         console.error('Error al inicializar mapa:', err);
         const loadingEl = document.getElementById('mapa-loading');
         if (loadingEl) {
-            loadingEl.innerHTML = '<span style="color:#ef4444;">⚠️ No se pudo inicializar el mapa Leaflet en este momento.</span>';
+            loadingEl.style.display = 'none';
         }
     }
+}
+
+function cambiarCapaBase(tipo) {
+    if (!leafletMap || !baseLayers[tipo]) return;
+    if (currentBaseLayer && leafletMap.hasLayer(currentBaseLayer)) {
+        leafletMap.removeLayer(currentBaseLayer);
+    }
+    currentBaseLayer = baseLayers[tipo];
+    currentBaseLayer.addTo(leafletMap);
+
+    document.querySelectorAll('.btn-map-layer').forEach(b => b.classList.remove('ativo'));
+    const btn = document.getElementById(`btn-layer-${tipo}`);
+    if (btn) btn.classList.add('ativo');
+
+    setTimeout(() => { if (leafletMap) leafletMap.invalidateSize(); }, 120);
 }
 
 function detectarUbicacionUsuario() {
@@ -1357,10 +1677,18 @@ async function cargarDatosUbicacionMapa() {
     }
     if (loadingText) loadingText.textContent = 'Cargando registros geográficos...';
 
+    const ocultarLoading = () => {
+        if (loadingEl) {
+            loadingEl.style.opacity = '0';
+            setTimeout(() => { loadingEl.style.display = 'none'; }, 250);
+        }
+    };
+    const safetyTimer = setTimeout(ocultarLoading, 1200);
+
     let data = null;
     try {
         const ctrl = new AbortController();
-        const timeout = setTimeout(() => ctrl.abort(), 5000);
+        const timeout = setTimeout(() => ctrl.abort(), 4000);
         const resp = await fetch(`${VISITAS_API_URL}/api/stats/locations?project=Calificaciones.py`, { signal: ctrl.signal }).catch(() => null);
         data = resp && resp.ok ? await resp.json() : null;
         clearTimeout(timeout);
@@ -1399,11 +1727,13 @@ async function cargarDatosUbicacionMapa() {
     const countries = (data && data.countries && data.countries.length) ? data.countries : [{ country: 'Paraguay', count: cities.reduce((acc, c) => acc + (c.count||1), 0) }];
 
     datosMapaCargados = { cities, countries };
-    renderizarBurbujasEnMapa(cities, countries);
-
-    if (loadingEl) {
-        loadingEl.style.opacity = '0';
-        setTimeout(() => { loadingEl.style.display = 'none'; }, 300);
+    try {
+        renderizarBurbujasEnMapa(cities, countries);
+    } catch (errRender) {
+        console.error('Error al renderizar burbujas:', errRender);
+    } finally {
+        clearTimeout(safetyTimer);
+        ocultarLoading();
     }
 }
 
